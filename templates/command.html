@@ -3,27 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Commands - Score Analyser</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>AI Commands - ScoreSense</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_m3.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="logo">📊 Score Analyser</h1>
+            <h1 class="logo">
+                <span class="material-symbols-outlined">analytics</span>
+                ScoreSense
+            </h1>
             <ul class="nav-menu">
                 <li><a href="/">Dashboard</a></li>
                 <li><a href="/students">Students</a></li>
                 <li><a href="/add">Add Student</a></li>
                 <li><a href="/stats">Statistics</a></li>
                 <li><a href="/command" class="active">Commands</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
         <div class="page-header">
-            <h2>🤖 Natural Language Commands</h2>
-            <p>Interact with the system using plain English</p>
+            <h2>
+                <span class="material-symbols-outlined">chat</span>
+                Natural Language Commands
+            </h2>
+            <p>Interact with the system using plain English or voice</p>
         </div>
 
         <div class="card">

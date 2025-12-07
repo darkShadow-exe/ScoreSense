@@ -7,7 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from models.student_model import (
     add_student, get_all_students, get_student_by_id, 
-    get_student_by_name, update_student, delete_student, get_all_subjects
+    get_student_by_name, update_student, delete_student, get_all_subjects,
+    get_all_exams_for_student, add_exam_score, delete_exam
 )
 from core.nlu import parse_command
 from core.stats import (
@@ -41,6 +42,7 @@ def add():
     """Add new student."""
     if request.method == 'POST':
         name = request.form.get('name')
+        exam_name = request.form.get('exam_name', 'Initial Assessment')
         marks = {}
         
         # Get all form fields that start with 'subject_'
@@ -54,7 +56,7 @@ def add():
                     marks[subject.lower()] = int(score)
         
         if name and marks:
-            result = add_student(name, marks)
+            result = add_student(name, marks, exam_name)
             if result:
                 return redirect(url_for('students'))
             else:
@@ -68,7 +70,7 @@ def add():
 
 @app.route('/edit/<int:student_id>', methods=['GET', 'POST'])
 def edit(student_id):
-    """Edit student information."""
+    """Edit student information and add new exam scores."""
     student = get_student_by_id(student_id)
     
     if not student:
@@ -76,6 +78,7 @@ def edit(student_id):
     
     if request.method == 'POST':
         name = request.form.get('name')
+        exam_name = request.form.get('exam_name', 'Update')
         marks = {}
         
         for key in request.form:
@@ -88,7 +91,7 @@ def edit(student_id):
                     marks[subject.lower()] = int(score)
         
         if marks:
-            update_student(student_id, name=name, marks_dict=marks)
+            update_student(student_id, name=name, marks_dict=marks, exam_name=exam_name)
         
         return redirect(url_for('students'))
     
@@ -135,7 +138,7 @@ def execute_command(parsed):
         name = parsed['name']
         marks = parsed['marks']
         
-        student_id = add_student(name, marks)
+        student_id = add_student(name, marks, 'Voice Command')
         if student_id:
             return {
                 'success': True,
@@ -154,7 +157,7 @@ def execute_command(parsed):
         if student:
             # Merge new marks with existing
             updated_marks = {**student['marks'], **marks}
-            update_student(student['id'], marks_dict=updated_marks)
+            update_student(student['id'], marks_dict=updated_marks, exam_name='Voice Update')
             return {
                 'success': True,
                 'message': f'Updated {name}. New marks: {updated_marks}',
@@ -304,6 +307,34 @@ def api_stats():
     """API endpoint to get statistics."""
     stats = get_all_stats()
     return jsonify(stats)
+
+@app.route('/student/<int:student_id>/exams')
+def student_exams(student_id):
+    """View all exams for a student."""
+    student = get_student_by_id(student_id)
+    if not student:
+        return redirect(url_for('students'))
+    
+    exams = get_all_exams_for_student(student_id)
+    return jsonify({'student': student, 'exams': exams})
+
+@app.route('/student/<int:student_id>/add_exam', methods=['POST'])
+def add_exam(student_id):
+    """Add a new exam score for a student."""
+    subject = request.form.get('subject')
+    score = request.form.get('score')
+    exam_name = request.form.get('exam_name', 'Test')
+    
+    if subject and score:
+        add_exam_score(student_id, subject, float(score), exam_name)
+    
+    return redirect(url_for('edit', student_id=student_id))
+
+@app.route('/exam/<int:exam_id>/delete', methods=['POST'])
+def delete_exam_route(exam_id):
+    """Delete an exam record."""
+    delete_exam(exam_id)
+    return redirect(request.referrer or url_for('students'))
 
 if __name__ == '__main__':
     print("Starting Score Analyser Application...")
