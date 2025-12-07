@@ -30,13 +30,13 @@
 
     <div class="container">
         <div class="dashboard-header">
-            <h2>Welcome to Score Analyser</h2>
-            <p>Manage student scores with AI-powered insights</p>
+            <h2>Welcome to ScoreSense</h2>
+            <p>Manage student scores with AI-powered insights and predictions</p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">👥</div>
+                <span class="material-symbols-outlined stat-icon">groups</span>
                 <div class="stat-content">
                     <h3>{{ stats.total_students }}</h3>
                     <p>Total Students</p>
@@ -44,7 +44,7 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">📈</div>
+                <span class="material-symbols-outlined stat-icon">trending_up</span>
                 <div class="stat-content">
                     <h3>{{ stats.class_average }}</h3>
                     <p>Class Average</p>
@@ -52,7 +52,7 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">🏆</div>
+                <span class="material-symbols-outlined stat-icon">emoji_events</span>
                 <div class="stat-content">
                     {% if stats.topper %}
                     <h3>{{ stats.topper.name }}</h3>
@@ -65,7 +65,7 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">📚</div>
+                <span class="material-symbols-outlined stat-icon">menu_book</span>
                 <div class="stat-content">
                     <h3>{{ stats.subject_averages|length }}</h3>
                     <p>Subjects</p>
@@ -75,25 +75,25 @@
 
         <div class="action-grid">
             <a href="/add" class="action-card">
-                <div class="action-icon">➕</div>
+                <span class="material-symbols-outlined action-icon">person_add</span>
                 <h3>Add Student</h3>
                 <p>Register new student with scores</p>
             </a>
 
             <a href="/students" class="action-card">
-                <div class="action-icon">📋</div>
+                <span class="material-symbols-outlined action-icon">list_alt</span>
                 <h3>View Students</h3>
                 <p>See all students and their marks</p>
             </a>
 
             <a href="/stats" class="action-card">
-                <div class="action-icon">📊</div>
+                <span class="material-symbols-outlined action-icon">bar_chart</span>
                 <h3>Statistics</h3>
                 <p>Detailed class analytics</p>
             </a>
 
             <a href="/command" class="action-card">
-                <div class="action-icon">🤖</div>
+                <span class="material-symbols-outlined action-icon">robot_2</span>
                 <h3>AI Commands</h3>
                 <p>Use natural language commands</p>
             </a>

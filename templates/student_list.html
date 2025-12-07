@@ -30,8 +30,14 @@
 
     <div class="container">
         <div class="page-header">
-            <h2>All Students</h2>
-            <a href="/add" class="btn btn-primary">➕ Add Student</a>
+            <h2>
+                <span class="material-symbols-outlined">groups</span>
+                All Students
+            </h2>
+            <a href="/add" class="btn btn-primary">
+                <span class="material-symbols-outlined">person_add</span>
+                Add Student
+            </a>
         </div>
 
         {% if students %}
@@ -87,13 +93,16 @@
             <h3>Visualization</h3>
             <div class="graph-buttons">
                 <button onclick="loadGraph('student_comparison')" class="btn btn-secondary">
-                    📊 Compare All Students
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Compare All Students
                 </button>
                 <button onclick="loadGraph('subject_average')" class="btn btn-secondary">
-                    📈 Subject Averages
+                    <span class="material-symbols-outlined">trending_up</span>
+                    Subject Averages
                 </button>
                 <button onclick="loadGraph('distribution')" class="btn btn-secondary">
-                    📉 Score Distribution
+                    <span class="material-symbols-outlined">show_chart</span>
+                    Score Distribution
                 </button>
             </div>
             <div id="graph-container" class="graph-container"></div>
@@ -101,10 +110,13 @@
 
         {% else %}
         <div class="empty-state">
-            <div class="empty-icon">📚</div>
+            <span class="material-symbols-outlined">school</span>
             <h3>No Students Yet</h3>
             <p>Add your first student to get started!</p>
-            <a href="/add" class="btn btn-primary">Add Student</a>
+            <a href="/add" class="btn btn-primary">
+                <span class="material-symbols-outlined">person_add</span>
+                Add Student
+            </a>
         </div>
         {% endif %}
     </div>
