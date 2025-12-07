@@ -267,19 +267,19 @@
             </h3>
             
             <div class="graph-buttons">
-                <button class="btn btn-primary" onclick="loadGraph('{{ stats.student.name }}', 'bar')">
+                <button class="btn btn-primary" onclick="loadGraph('student_bar', {student: '{{ stats.student.name }}' })">
                     <span class="material-symbols-outlined">bar_chart</span>
                     Bar Chart
                 </button>
-                <button class="btn btn-primary" onclick="loadGraph('{{ stats.student.name }}', 'line')">
+                <button class="btn btn-primary" onclick="loadGraph('student_line', {student: '{{ stats.student.name }}' })">
                     <span class="material-symbols-outlined">show_chart</span>
                     Line Chart
                 </button>
-                <button class="btn btn-primary" onclick="loadGraph('{{ stats.student.name }}', 'pie')">
+                <button class="btn btn-primary" onclick="loadGraph('student_pie', {student: '{{ stats.student.name }}' })">
                     <span class="material-symbols-outlined">pie_chart</span>
                     Pie Chart
                 </button>
-                <button class="btn btn-primary" onclick="loadGraph('{{ stats.student.name }}', 'radar')">
+                <button class="btn btn-primary" onclick="loadGraph('student_radar', {student: '{{ stats.student.name }}' })">
                     <span class="material-symbols-outlined">radar</span>
                     Radar Chart
                 </button>

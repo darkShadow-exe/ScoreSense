@@ -80,6 +80,19 @@ def add_student(name, grade=None, section=None, age=None, gender=None, email=Non
     except sqlite3.IntegrityError:
         return None
 
+def get_student_average(student_id):
+    """Calculate average score for a student from all exams."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT AVG(score) FROM exams WHERE student_id = ?', (student_id,))
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result and result[0] is not None:
+        return round(result[0], 1)
+    return None
+
 def get_all_students():
     """Get all students with their marks and details."""
     conn = get_connection()
@@ -90,8 +103,9 @@ def get_all_students():
     
     students = []
     for row in rows:
+        student_id = row[0]
         students.append({
-            'id': row[0],
+            'id': student_id,
             'name': row[1],
             'marks': json.loads(row[2]),
             'grade': row[3],
@@ -100,7 +114,8 @@ def get_all_students():
             'gender': row[6],
             'email': row[7],
             'phone': row[8],
-            'address': row[9]
+            'address': row[9],
+            'average': get_student_average(student_id)
         })
     
     conn.close()

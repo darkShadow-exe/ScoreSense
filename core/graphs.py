@@ -1,24 +1,56 @@
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend
 import matplotlib.pyplot as plt
+import numpy as np
 import io
 import base64
-from models.student_model import get_all_students, get_student_by_name
+from models.student_model import get_all_students, get_student_by_name, get_student_by_id
 from core.stats import get_subject_averages, get_score_distribution, compare_subject_scores
 
-def generate_student_bar(student_name):
-    """
-    Generate bar chart for a single student's subject scores.
-    Returns base64 encoded image.
-    """
-    from models.student_model import get_student_by_name
+def get_student_latest_scores(student_name):
+    """Get the most recent score for each subject for a student."""
+    import sqlite3
+    from models.student_model import get_connection
     
     student = get_student_by_name(student_name)
     if not student:
+        return {}
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Get latest score for each subject
+    cursor.execute('''
+        SELECT subject, score
+        FROM exams
+        WHERE student_id = ? AND id IN (
+            SELECT MAX(id)
+            FROM exams
+            WHERE student_id = ?
+            GROUP BY subject
+        )
+        ORDER BY subject
+    ''', (student['id'], student['id']))
+    
+    scores = {}
+    for row in cursor.fetchall():
+        scores[row[0]] = row[1]
+    
+    conn.close()
+    return scores
+
+def generate_student_bar(student_name):
+    """
+    Generate bar chart for a single student's latest subject scores.
+    Returns base64 encoded image.
+    """
+    scores_dict = get_student_latest_scores(student_name)
+    
+    if not scores_dict:
         return None
     
-    subjects = list(student['marks'].keys())
-    scores = list(student['marks'].values())
+    subjects = list(scores_dict.keys())
+    scores = list(scores_dict.values())
     
     plt.figure(figsize=(10, 6))
     bars = plt.bar(subjects, scores, color='#4CAF50', alpha=0.8)
@@ -27,7 +59,7 @@ def generate_student_bar(student_name):
     for bar in bars:
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2., height,
-                f'{int(height)}',
+                f'{height:.1f}',
                 ha='center', va='bottom', fontsize=10)
     
     plt.xlabel('Subjects', fontsize=12)
@@ -243,3 +275,143 @@ def fig_to_base64():
     img_buffer.seek(0)
     img_str = base64.b64encode(img_buffer.read()).decode()
     return img_str
+
+def generate_student_pie(student_name):
+    """
+    Generate pie chart for a student's subject score distribution.
+    Returns base64 encoded image.
+    """
+    scores_dict = get_student_latest_scores(student_name)
+    
+    if not scores_dict:
+        return None
+    
+    subjects = list(scores_dict.keys())
+    scores = list(scores_dict.values())
+    
+    plt.figure(figsize=(10, 8))
+    colors = plt.cm.Set3(np.linspace(0, 1, len(subjects)))
+    
+    wedges, texts, autotexts = plt.pie(scores, labels=subjects, autopct='%1.1f%%',
+                                        colors=colors, startangle=90)
+    
+    # Make percentage text bold
+    for autotext in autotexts:
+        autotext.set_color('white')
+        autotext.set_fontweight('bold')
+        autotext.set_fontsize(10)
+    
+    plt.title(f"{student_name}'s Score Distribution", fontsize=14, fontweight='bold')
+    plt.axis('equal')
+    plt.tight_layout()
+    
+    img_data = fig_to_base64()
+    plt.close()
+    
+    return img_data
+
+def generate_student_line(student_name):
+    """
+    Generate line chart showing all exam scores for a student.
+    Returns base64 encoded image.
+    """
+    from models.student_model import get_connection
+    
+    student = get_student_by_name(student_name)
+    if not student:
+        return None
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Get all exams ordered by exam name
+    cursor.execute('''
+        SELECT exam_name, subject, score
+        FROM exams
+        WHERE student_id = ?
+        ORDER BY id
+    ''', (student['id'],))
+    
+    exam_data = cursor.fetchall()
+    conn.close()
+    
+    if not exam_data:
+        return None
+    
+    # Organize data by subject
+    subjects_data = {}
+    for exam_name, subject, score in exam_data:
+        if subject not in subjects_data:
+            subjects_data[subject] = []
+        subjects_data[subject].append(score)
+    
+    plt.figure(figsize=(12, 6))
+    
+    for subject, scores in subjects_data.items():
+        plt.plot(range(1, len(scores) + 1), scores, marker='o', 
+                label=subject, linewidth=2, markersize=6)
+    
+    plt.xlabel('Exam Number', fontsize=12)
+    plt.ylabel('Score', fontsize=12)
+    plt.title(f"{student_name}'s Score Trends Across Exams", fontsize=14, fontweight='bold')
+    plt.legend(loc='best', fontsize=10)
+    plt.ylim(0, 105)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    
+    img_data = fig_to_base64()
+    plt.close()
+    
+    return img_data
+
+def generate_student_radar(student_name):
+    """
+    Generate radar/spider chart for a student's subject scores.
+    Returns base64 encoded image.
+    """
+    scores_dict = get_student_latest_scores(student_name)
+    
+    if not scores_dict:
+        return None
+    
+    subjects = list(scores_dict.keys())
+    scores = list(scores_dict.values())
+    
+    # Number of variables
+    num_vars = len(subjects)
+    
+    # Compute angle for each axis
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    
+    # Complete the loop
+    scores += scores[:1]
+    angles += angles[:1]
+    
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(projection='polar'))
+    
+    # Plot data
+    ax.plot(angles, scores, 'o-', linewidth=2, color='#4CAF50')
+    ax.fill(angles, scores, alpha=0.25, color='#4CAF50')
+    
+    # Fix axis to go in the right order
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+    
+    # Draw axis lines for each angle and label
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(subjects, fontsize=10)
+    
+    # Set y-axis limits
+    ax.set_ylim(0, 100)
+    
+    # Add grid
+    ax.grid(True)
+    
+    plt.title(f"{student_name}'s Subject Performance Radar", 
+             fontsize=14, fontweight='bold', pad=20)
+    plt.tight_layout()
+    
+    img_data = fig_to_base64()
+    plt.close()
+    
+    return img_data

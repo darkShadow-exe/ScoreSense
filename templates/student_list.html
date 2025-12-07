@@ -68,9 +68,8 @@
                             </td>
                             {% endfor %}
                             <td>
-                                {% set scores = student.marks.values()|list %}
-                                {% if scores %}
-                                <strong>{{ (scores|sum / scores|length)|round(1) }}</strong>
+                                {% if student.average %}
+                                <strong>{{ student.average }}</strong>
                                 {% else %}
                                 -
                                 {% endif %}
