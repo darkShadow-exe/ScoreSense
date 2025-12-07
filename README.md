@@ -5,20 +5,23 @@ A comprehensive Flask web application for managing student scores with natural l
 ## Features
 
 ### ✅ Core Features
-- **Student Management**: Add, edit, delete, and view students with their scores
+- **Student Profile Management**: Comprehensive student profiles with personal details (grade, section, age, gender, contact info)
+- **Multi-Exam Support**: Track unlimited exams per student with organized exam history
 - **Natural Language Commands**: Control the system using plain English
-- **Advanced Statistics**: Class averages, toppers, subject difficulty rankings
-- **Data Visualizations**: Beautiful graphs using Matplotlib
+- **Advanced Statistics**: Class averages, toppers, subject difficulty rankings, detailed student analytics
+- **Data Visualizations**: Beautiful graphs using Matplotlib with multiple chart types
 - **AI Predictions**: Linear regression-based score predictions
-- **SQLite Database**: Persistent storage with exam history tracking
+- **Material Design 3**: Modern UI with glass morphism and smooth animations
+- **SQLite Database**: Persistent storage with comprehensive exam history tracking
 
 ### 🤖 Natural Language Commands
 Execute actions using natural language:
-- "Add Krish with 95 in math and 80 in physics"
+- "Add student Krish in grade 10 section A"
+- "Add complete exam for Krish: Midterm with math 95, physics 80, chemistry 88"
 - "Show class topper"
 - "Predict Sneha's next math score"
 - "Compare scores of the class in chemistry"
-- "Update John with 88 in physics"
+- "Update John's profile with new email"
 - "Delete Sarah"
 
 ### 📊 Visualizations
@@ -53,9 +56,10 @@ score_analyser/
 │
 ├── templates/                  # HTML templates
 │   ├── index.html             # Dashboard
-│   ├── add_student.html       # Add student form
+│   ├── add_student.html       # Add student profile (no exams)
 │   ├── student_list.html      # Students listing
-│   ├── edit_student.html      # Edit student form
+│   ├── edit_student.html      # Edit profile & manage exams
+│   ├── student_detail.html    # Detailed student analytics
 │   ├── stats.html             # Statistics page
 │   └── command.html           # NL command interface
 │
@@ -113,13 +117,19 @@ http://localhost:5000
 
 ### Adding Students
 1. Navigate to "Add Student" page
-2. Enter student name
-3. Add subjects and scores (can add multiple)
-4. Click "Add Student"
+2. Enter student profile information:
+   - Name (required)
+   - Grade, Section, Age
+   - Gender
+   - Email, Phone, Address
+3. Click "Add Student"
+4. Navigate to "Edit Student" to add exams
+5. Use "Add New Complete Exam" section to add all subjects for an exam at once
 
 **OR** use natural language:
 ```
-Command: "Add John with 90 in math and 85 in physics"
+Command: "Add student John in grade 11 section B"
+Command: "Add complete exam for John: Finals with math 90, physics 85, chemistry 92"
 ```
 
 ### Viewing Statistics
@@ -151,10 +161,12 @@ Displays ranked list of all students in that subject.
 ### Web Routes
 - `GET /` - Dashboard
 - `GET /students` - List all students
-- `GET /add` - Add student form
-- `POST /add` - Create student
+- `GET /add` - Add student profile form
+- `POST /add` - Create student profile
 - `GET /edit/<id>` - Edit student form
-- `POST /edit/<id>` - Update student
+- `POST /edit/<id>` - Update student profile
+- `POST /student/<id>/add_complete_exam` - Add complete exam with all subjects
+- `GET /student/<id>/stats` - Detailed student analytics page
 - `POST /delete/<id>` - Delete student
 - `GET /stats` - Statistics page
 - `GET /command` - Command interface
@@ -184,38 +196,56 @@ Uses regex-based heuristic parsing to extract:
 
 **students table:**
 - id (PRIMARY KEY)
-- name (UNIQUE)
-- marks (JSON)
-- created_at
+- name (TEXT, UNIQUE)
+- marks (TEXT, JSON - legacy field)
+- grade (TEXT)
+- section (TEXT)
+- age (INTEGER)
+- gender (TEXT)
+- email (TEXT)
+- phone (TEXT)
+- address (TEXT)
+- created_at (TIMESTAMP)
 
 **exams table:**
 - id (PRIMARY KEY)
-- student_id (FOREIGN KEY)
-- subject
-- score
-- exam_date
+- student_id (INTEGER, FOREIGN KEY)
+- exam_name (TEXT) - Groups subjects by exam
+- subject (TEXT)
+- score (REAL)
+- exam_date (TIMESTAMP)
 
 ## Example Workflow
 
-1. **Add Students**
-   ```
-   Add Alice with 92 in math, 88 in physics, 85 in chemistry
-   Add Bob with 78 in math, 82 in physics, 90 in chemistry
-   Add Carol with 95 in math, 91 in physics, 87 in chemistry
-   ```
+1. **Add Student Profiles**
+   - Add Alice (Grade 10, Section A, age 15, alice@school.com)
+   - Add Bob (Grade 10, Section B, age 16, bob@school.com)
+   - Add Carol (Grade 10, Section A, age 15, carol@school.com)
 
-2. **View Statistics**
+2. **Add Exams for Each Student**
+   - Alice - Midterm Exam: Math 92, Physics 88, Chemistry 85
+   - Bob - Midterm Exam: Math 78, Physics 82, Chemistry 90
+   - Carol - Midterm Exam: Math 95, Physics 91, Chemistry 87
+
+3. **View Detailed Student Stats**
+   - Navigate to student detail page
+   - View profile information
+   - See exam history in accordion layout
+   - Analyze subject-wise performance trends
+   - Generate charts (bar, line, pie, radar)
+
+4. **View Class Statistics**
    - Class average: ~87.5
    - Topper: Carol (91.0)
    - Hardest subject: Physics (87.0)
 
-3. **Make Predictions**
+5. **Make Predictions**
    ```
    Predict Alice's next math score
    → Predicted: 93.5 (High confidence, Improving trend)
    ```
 
-4. **Compare Performance**
+6. **Compare Performance**
    ```
    Compare scores in chemistry
    → 1. Bob (90), 2. Carol (87), 3. Alice (85)
@@ -233,10 +263,12 @@ Edit `core/predict.py` to customize:
 - Modify heuristic fallback logic
 
 ### Styling
-Edit `static/styles.css` to customize:
-- Color scheme
-- Layout
-- Responsive breakpoints
+Edit `static/styles_m3.css` to customize:
+- Material Design 3 color scheme
+- Glass morphism effects
+- Animation timing and easing
+- Layout and responsive breakpoints
+- Accordion styles
 
 ## Troubleshooting
 
