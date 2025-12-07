@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Analyser - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">📊 Score Analyser</h1>
+            <ul class="nav-menu">
+                <li><a href="/" class="active">Dashboard</a></li>
+                <li><a href="/students">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Welcome to Score Analyser</h2>
+            <p>Manage student scores with AI-powered insights</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_students }}</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <h3>{{ stats.class_average }}</h3>
+                    <p>Class Average</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-content">
+                    {% if stats.topper %}
+                    <h3>{{ stats.topper.name }}</h3>
+                    <p>Class Topper ({{ stats.topper.average }})</p>
+                    {% else %}
+                    <h3>-</h3>
+                    <p>No Data</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                    <h3>{{ stats.subject_averages|length }}</h3>
+                    <p>Subjects</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-grid">
+            <a href="/add" class="action-card">
+                <div class="action-icon">➕</div>
+                <h3>Add Student</h3>
+                <p>Register new student with scores</p>
+            </a>
+
+            <a href="/students" class="action-card">
+                <div class="action-icon">📋</div>
+                <h3>View Students</h3>
+                <p>See all students and their marks</p>
+            </a>
+
+            <a href="/stats" class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Statistics</h3>
+                <p>Detailed class analytics</p>
+            </a>
+
+            <a href="/command" class="action-card">
+                <div class="action-icon">🤖</div>
+                <h3>AI Commands</h3>
+                <p>Use natural language commands</p>
+            </a>
+        </div>
+
+        {% if stats.subject_averages %}
+        <div class="card">
+            <h3>Subject Performance Overview</h3>
+            <div class="subject-list">
+                {% for subject, average in stats.subject_averages.items() %}
+                <div class="subject-item">
+                    <span class="subject-name">{{ subject|capitalize }}</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ average }}%"></div>
+                    </div>
+                    <span class="subject-score">{{ average }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="quick-commands">
+            <h3>Quick Commands</h3>
+            <div class="command-examples">
+                <code>"Add John with 90 in math and 85 in physics"</code>
+                <code>"Show class topper"</code>
+                <code>"Predict Sarah's math score"</code>
+                <code>"Compare scores in chemistry"</code>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Score Analyser © 2025 | Powered by Flask & AI</p>
+    </footer>
+</body>
+</html>

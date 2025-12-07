@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Score Analyser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">📊 Score Analyser</h1>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats" class="active">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Class Statistics & Analytics</h2>
+
+        <div class="stats-grid">
+            <div class="stat-card highlight">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>{{ stats.total_students }}</h3>
+                    <p>Total Students</p>
+                </div>
+            </div>
+
+            <div class="stat-card highlight">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <h3>{{ stats.class_average }}</h3>
+                    <p>Class Average</p>
+                </div>
+            </div>
+
+            <div class="stat-card highlight">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-content">
+                    {% if stats.topper %}
+                    <h3>{{ stats.topper.name }}</h3>
+                    <p>Topper ({{ stats.topper.average }})</p>
+                    {% else %}
+                    <h3>-</h3>
+                    <p>No Data</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-card highlight">
+                <div class="stat-icon">📉</div>
+                <div class="stat-content">
+                    {% if stats.lowest %}
+                    <h3>{{ stats.lowest.name }}</h3>
+                    <p>Needs Help ({{ stats.lowest.average }})</p>
+                    {% else %}
+                    <h3>-</h3>
+                    <p>No Data</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if stats.subject_averages %}
+        <div class="card">
+            <h3>📚 Subject Performance</h3>
+            <div class="subject-stats">
+                {% for subject, average in stats.subject_averages.items() %}
+                <div class="subject-stat-item">
+                    <div class="subject-header">
+                        <span class="subject-title">{{ subject|capitalize }}</span>
+                        <span class="subject-avg">{{ average }}</span>
+                    </div>
+                    <div class="progress-bar-full">
+                        <div class="progress-fill-stat" data-width="{{ average }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stats.difficulty_ranking %}
+        <div class="card">
+            <h3>🎯 Subject Difficulty Ranking</h3>
+            <p class="subtitle">Lower average = More difficult</p>
+            <div class="ranking-list">
+                {% for subject, avg in stats.difficulty_ranking %}
+                <div class="ranking-item">
+                    <span class="rank-number">{{ loop.index }}</span>
+                    <span class="rank-subject">{{ subject|capitalize }}</span>
+                    <span class="rank-score">Average: {{ avg }}</span>
+                    <span class="rank-difficulty">
+                        {% if avg < 60 %}
+                        <span class="badge badge-hard">Hard</span>
+                        {% elif avg < 75 %}
+                        <span class="badge badge-medium">Medium</span>
+                        {% else %}
+                        <span class="badge badge-easy">Easy</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stats.score_distribution %}
+        <div class="card">
+            <h3>📊 Score Distribution</h3>
+            <div class="distribution-grid">
+                {% for range, count in stats.score_distribution.items() %}
+                <div class="distribution-item">
+                    <div class="dist-label">{{ range }}</div>
+                    <div class="dist-bar">
+                        <div class="dist-fill" data-count="{{ count }}"></div>
+                    </div>
+                    <div class="dist-count">{{ count }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h3>📈 Visualizations</h3>
+            <div class="graph-buttons">
+                <button onclick="loadGraph('subject_average')" class="btn btn-primary">
+                    Subject Averages
+                </button>
+                <button onclick="loadGraph('distribution')" class="btn btn-primary">
+                    Score Distribution
+                </button>
+                <button onclick="loadGraph('student_comparison')" class="btn btn-primary">
+                    Student Comparison
+                </button>
+            </div>
+            <div id="graph-container" class="graph-container"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Animate progress bars
+        document.addEventListener('DOMContentLoaded', function() {
+            const fills = document.querySelectorAll('.progress-fill-stat');
+            fills.forEach(fill => {
+                const width = fill.getAttribute('data-width');
+                setTimeout(() => {
+                    fill.style.width = width + '%';
+                }, 100);
+            });
+
+            const distFills = document.querySelectorAll('.dist-fill');
+            const maxCount = Math.max(...Array.from(distFills).map(f => 
+                parseInt(f.getAttribute('data-count'))));
+            
+            distFills.forEach(fill => {
+                const count = parseInt(fill.getAttribute('data-count'));
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                setTimeout(() => {
+                    fill.style.width = percentage + '%';
+                }, 100);
+            });
+        });
+    </script>
+
+    <footer>
+        <p>Score Analyser © 2025</p>
+    </footer>
+</body>
+</html>

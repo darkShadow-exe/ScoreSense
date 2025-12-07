@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student - Score Analyser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">📊 Score Analyser</h1>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students" class="active">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-header">
+            <h2>Edit Student: {{ student.name }}</h2>
+            <p>Update student information and scores</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" action="/edit/{{ student.id }}">
+                <div class="form-group">
+                    <label for="name">Student Name *</label>
+                    <input type="text" id="name" name="name" value="{{ student.name }}" required>
+                </div>
+
+                <div id="subjects-container">
+                    {% set count = [0] %}
+                    {% for subject, score in student.marks.items() %}
+                    {% set _ = count.append(count.pop() + 1) %}
+                    <div class="subject-entry">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <input type="text" name="subject_{{ count[0] }}" value="{{ subject }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Score</label>
+                                <input type="number" name="score_{{ count[0] }}" value="{{ score }}" 
+                                       min="0" max="100" required>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" onclick="addSubjectField()" class="btn btn-secondary">
+                    ➕ Add Another Subject
+                </button>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Student</button>
+                    <a href="/students" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let subjectCount = {{ student.marks|length }};
+
+        function addSubjectField() {
+            subjectCount++;
+            const container = document.getElementById('subjects-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'subject-entry';
+            newEntry.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="subject_${subjectCount}" placeholder="e.g., Physics">
+                    </div>
+                    <div class="form-group">
+                        <label>Score</label>
+                        <input type="number" name="score_${subjectCount}" min="0" max="100" placeholder="0-100">
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn-remove">✕</button>
+                </div>
+            `;
+            container.appendChild(newEntry);
+        }
+    </script>
+
+    <footer>
+        <p>Score Analyser © 2025</p>
+    </footer>
+</body>
+</html>

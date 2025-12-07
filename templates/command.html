@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Commands - Score Analyser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">📊 Score Analyser</h1>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command" class="active">Commands</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>🤖 Natural Language Commands</h2>
+            <p>Interact with the system using plain English</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" action="/command">
+                <div class="form-group">
+                    <label for="command">Enter Your Command</label>
+                    <textarea id="command" name="command" rows="3" 
+                              placeholder="Type a command like: 'Add Sarah with 92 in math and 88 in physics'"
+                              required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">🚀 Execute Command</button>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="card result-card">
+            <h3>Result</h3>
+            
+            {% if result.error %}
+            <div class="alert alert-error">
+                {{ result.error }}
+            </div>
+            
+            {% elif result.success %}
+            <div class="alert alert-success">
+                <strong>Success!</strong> {{ result.message }}
+            </div>
+
+            {% if result.student %}
+            <div class="result-details">
+                <h4>Student Details:</h4>
+                <p><strong>Name:</strong> {{ result.student.name }}</p>
+                {% if result.student.marks %}
+                <p><strong>Marks:</strong></p>
+                <ul>
+                    {% for subject, score in result.student.marks.items() %}
+                    <li>{{ subject|capitalize }}: {{ score }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if result.rank %}
+                <p><strong>Rank:</strong> {{ result.rank.rank }} / {{ result.rank.total }}</p>
+                <p><strong>Average:</strong> {{ result.rank.average }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if result.topper %}
+            <div class="result-details">
+                <h4>🏆 Topper Information:</h4>
+                <p><strong>Name:</strong> {{ result.topper.name }}</p>
+                {% if result.topper.subject %}
+                <p><strong>Subject:</strong> {{ result.topper.subject }}</p>
+                <p><strong>Score:</strong> {{ result.topper.score }}</p>
+                {% else %}
+                <p><strong>Average:</strong> {{ result.topper.average }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if result.prediction %}
+            <div class="result-details prediction-result">
+                <h4>🔮 Prediction Results:</h4>
+                <p><strong>Student:</strong> {{ result.student }}</p>
+                <p><strong>Subject:</strong> {{ result.subject|capitalize }}</p>
+                <p><strong>Predicted Score:</strong> <span class="highlight">{{ result.prediction.predicted_score }}</span></p>
+                <p><strong>Confidence:</strong> 
+                    <span class="badge badge-{{ result.prediction.confidence }}">
+                        {{ result.prediction.confidence|upper }}
+                    </span>
+                </p>
+                <p><strong>Method:</strong> {{ result.prediction.method }}</p>
+                {% if result.prediction.trend %}
+                <p><strong>Trend:</strong> 
+                    <span class="trend-{{ result.prediction.trend }}">{{ result.prediction.trend|capitalize }}</span>
+                </p>
+                {% endif %}
+                <p class="info-text">{{ result.prediction.message }}</p>
+            </div>
+            {% endif %}
+
+            {% if result.comparisons %}
+            <div class="result-details">
+                <h4>📊 Comparison Results - {{ result.subject|capitalize }}</h4>
+                {% if result.average %}
+                <p><strong>Class Average:</strong> {{ result.average }}</p>
+                {% endif %}
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in result.comparisons %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ comp.name }}</td>
+                            <td><span class="score-badge">{{ comp.score }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            {% if result.stats %}
+            <div class="result-details">
+                <h4>📈 Class Statistics:</h4>
+                <p><strong>Total Students:</strong> {{ result.stats.total_students }}</p>
+                <p><strong>Class Average:</strong> {{ result.stats.class_average }}</p>
+                {% if result.stats.topper %}
+                <p><strong>Topper:</strong> {{ result.stats.topper.name }} ({{ result.stats.topper.average }})</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h3>💡 Example Commands</h3>
+            <div class="examples-grid">
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Add John with 90 in math and 85 in physics</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Update Sarah with 95 in chemistry</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show class topper</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show topper in math</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Predict Alice's math score</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Predict Grace's physics score</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Compare scores in biology</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show class average</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Delete Tom</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📖 Command Guide</h3>
+            <div class="guide-list">
+                <div class="guide-item">
+                    <strong>Add Student:</strong>
+                    <span>"Add [Name] with [Score] in [Subject] and [Score] in [Subject]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Update Student:</strong>
+                    <span>"Update [Name] with [Score] in [Subject]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Delete Student:</strong>
+                    <span>"Delete [Name]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Show Topper:</strong>
+                    <span>"Show class topper" or "Show topper in [Subject]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Predict Score:</strong>
+                    <span>"Predict [Name]'s [Subject] score"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Compare Scores:</strong>
+                    <span>"Compare scores in [Subject]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Show Statistics:</strong>
+                    <span>"Show class average" or "Show stats"</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fillCommand(text) {
+            document.getElementById('command').value = text.trim();
+        }
+    </script>
+
+    <footer>
+        <p>Score Analyser © 2025</p>
+    </footer>
+</body>
+</html>

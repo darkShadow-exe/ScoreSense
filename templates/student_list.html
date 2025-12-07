@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Score Analyser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">📊 Score Analyser</h1>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students" class="active">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>All Students</h2>
+            <a href="/add" class="btn btn-primary">➕ Add Student</a>
+        </div>
+
+        {% if students %}
+        <div class="card">
+            <div class="table-responsive">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            {% for subject in subjects %}
+                            <th>{{ subject|capitalize }}</th>
+                            {% endfor %}
+                            <th>Average</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td class="student-name">{{ student.name }}</td>
+                            {% for subject in subjects %}
+                            <td>
+                                {% if subject in student.marks %}
+                                <span class="score-badge">{{ student.marks[subject] }}</span>
+                                {% else %}
+                                <span class="score-na">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td>
+                                {% set scores = student.marks.values()|list %}
+                                {% if scores %}
+                                <strong>{{ (scores|sum / scores|length)|round(1) }}</strong>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="actions">
+                                <a href="/edit/{{ student.id }}" class="btn-small btn-edit">Edit</a>
+                                <form method="POST" action="/delete/{{ student.id }}" style="display: inline;">
+                                    <button type="submit" class="btn-small btn-delete" 
+                                            onclick="return confirm('Delete {{ student.name }}?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="visualization-section">
+            <h3>Visualization</h3>
+            <div class="graph-buttons">
+                <button onclick="loadGraph('student_comparison')" class="btn btn-secondary">
+                    📊 Compare All Students
+                </button>
+                <button onclick="loadGraph('subject_average')" class="btn btn-secondary">
+                    📈 Subject Averages
+                </button>
+                <button onclick="loadGraph('distribution')" class="btn btn-secondary">
+                    📉 Score Distribution
+                </button>
+            </div>
+            <div id="graph-container" class="graph-container"></div>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <h3>No Students Yet</h3>
+            <p>Add your first student to get started!</p>
+            <a href="/add" class="btn btn-primary">Add Student</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <footer>
+        <p>Score Analyser © 2025</p>
+    </footer>
+</body>
+</html>
