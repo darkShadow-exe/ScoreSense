@@ -65,19 +65,46 @@
                 <span class="material-symbols-outlined">history_edu</span>
                 Exam History
             </h3>
-            
-            {% set exams_by_name = [] %}
-            {% if student.id %}
-                <!-- Get exams grouped by exam name -->
-                {{ exams_by_name.append(1) or "" }}
-            {% endif %}
+            <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">
+                Click on an exam to expand/collapse details
+            </p>
             
             <div id="existing-exams">
-                <!-- This will be populated via JavaScript or server-side -->
-                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 2rem;">
-                    <span class="material-symbols-outlined" style="font-size: 3rem; opacity: 0.5;">folder_open</span><br>
-                    Exam history will be displayed here. View the detailed stats page to see all exams.
-                </p>
+                {% if exams %}
+                    {% for exam_name, exam_data in exams.items() %}
+                    <details class="accordion-item">
+                        <summary class="accordion-header">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <strong style="font-size: 1.1rem;">{{ exam_name }}</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem;">
+                                    {{ exam_data.date.split()[0] }}
+                                </span>
+                            </div>
+                        </summary>
+                        <div class="accordion-content">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                                {% for subject_data in exam_data.subjects %}
+                                <div class="subject-score-card" style="padding: 1rem; background: var(--md-sys-color-surface-variant); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 500; text-transform: capitalize;">{{ subject_data.subject }}</span>
+                                    <span style="font-size: 1.25rem; font-weight: 700; color: var(--md-sys-color-primary);">{{ subject_data.score }}%</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                                <span style="font-weight: 500;">Average: </span>
+                                <span style="font-size: 1.25rem; font-weight: 700; color: var(--md-sys-color-tertiary);">
+                                    {{ "%.1f"|format(exam_data.subjects|map(attribute='score')|sum / exam_data.subjects|length) }}%
+                                </span>
+                            </div>
+                        </div>
+                    </details>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 2rem;">
+                        <span class="material-symbols-outlined" style="font-size: 3rem; opacity: 0.5;">folder_open</span><br>
+                        No exams recorded yet. Add your first exam below.
+                    </p>
+                {% endif %}
             </div>
         </div>
 
@@ -98,21 +125,20 @@
                 </div>
 
                 <div id="new-subjects-container">
-                    {% set count = [0] %}
-                    {% for subject, score in student.marks.items() %}
-                    {% set _ = count.append(count.pop() + 1) %}
+                    <!-- Start with common subjects pre-filled -->
+                    {% for subject in student.marks.keys() %}
                     <div class="subject-entry">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Subject</label>
-                                <input type="text" name="subject_{{ count[0] }}" value="{{ subject }}" required>
+                                <input type="text" name="subject_{{ loop.index }}" value="{{ subject }}" required>
                             </div>
                             <div class="form-group">
                                 <label>Score</label>
-                                <input type="number" name="score_{{ count[0] }}" placeholder="0-100" 
+                                <input type="number" name="score_{{ loop.index }}" placeholder="0-100" 
                                        min="0" max="100" step="0.1" required>
                             </div>
-                            {% if count[0] > 1 %}
+                            {% if loop.index > 1 %}
                             <button type="button" onclick="this.closest('.subject-entry').remove()" class="btn-remove" title="Remove subject">
                                 <span class="material-symbols-outlined">close</span>
                             </button>
@@ -140,30 +166,78 @@
         <div class="card">
             <h3 style="display: flex; align-items: center; gap: 0.5rem;">
                 <span class="material-symbols-outlined">person</span>
-                Update Student Information
+                Personal Information
             </h3>
 
             <form method="POST" action="/edit/{{ student.id }}">
-                <div class="form-group">
-                    <label for="name">Student Name *</label>
-                    <input type="text" id="name" name="name" value="{{ student.name }}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" value="{{ student.name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="1" max="100" 
+                               value="{{ student.age if student.age else '' }}" placeholder="Student age">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="grade">Grade/Class</label>
+                        <input type="text" id="grade" name="grade" 
+                               value="{{ student.grade if student.grade else '' }}" 
+                               placeholder="e.g., 10th Grade, Year 5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="section">Section</label>
+                        <input type="text" id="section" name="section" 
+                               value="{{ student.section if student.section else '' }}" 
+                               placeholder="e.g., A, B, Science">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="exam_name">Quick Add Exam Name (Optional)</label>
-                    <input type="text" id="exam_name" name="exam_name" placeholder="Leave blank to only update name">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">Select gender</option>
+                        <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+                        <option value="Prefer not to say" {% if student.gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+                    </select>
                 </div>
 
-                <div id="subjects-container">
-                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem; margin-bottom: 1rem;">
-                        Use the "Add New Complete Exam" section above for better organization
-                    </p>
+                <h4 style="margin-top: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined">contact_mail</span>
+                    Contact Information
+                </h4>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" 
+                           value="{{ student.email if student.email else '' }}" 
+                           placeholder="student@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" 
+                           value="{{ student.phone if student.phone else '' }}" 
+                           placeholder="+1 234 567 8900">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="3" placeholder="Student's residential address">{{ student.address if student.address else '' }}</textarea>
                 </div>
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <span class="material-symbols-outlined">save</span>
-                        Update Name
+                        Update Student Profile
                     </button>
                     <a href="/students" class="btn btn-outline">Cancel</a>
                 </div>
@@ -176,7 +250,7 @@
     </footer>
 
     <script>
-        let newSubjectCount = {{ student.marks|length }};
+        let newSubjectCount = {{ student.marks|length if student.marks else 0 }};
 
         function addNewSubjectField() {
             newSubjectCount++;

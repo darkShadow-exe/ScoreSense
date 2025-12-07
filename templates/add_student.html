@@ -1,40 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student - ScoreSense</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles_m3.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
+    <nav>
         <div class="nav-container">
             <h1 class="logo">
                 <span class="material-symbols-outlined">analytics</span>
                 ScoreSense
             </h1>
-            <ul class="nav-menu">
-                <li><a href="/">Dashboard</a></li>
-                <li><a href="/students">Students</a></li>
-                <li><a href="/add" class="active">Add Student</a></li>
-                <li><a href="/stats">Statistics</a></li>
-                <li><a href="/command">Commands</a></li>
-                <li>
-                    <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
-                        <span class="material-symbols-outlined">dark_mode</span>
-                    </button>
-                </li>
-            </ul>
+            <div class="nav-menu">
+                <a href="{{ url_for('index') }}">
+                    <span class="material-symbols-outlined">home</span>
+                    Home
+                </a>
+                <a href="{{ url_for('students') }}">
+                    <span class="material-symbols-outlined">group</span>
+                    Students
+                </a>
+                <a href="{{ url_for('stats') }}">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    Stats
+                </a>
+                <a href="{{ url_for('command') }}">
+                    <span class="material-symbols-outlined">psychology</span>
+                    AI Commands
+                </a>
+            </div>
+            <button class="theme-toggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
+                <span class="material-symbols-outlined">dark_mode</span>
+            </button>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container">
         <div class="page-header">
             <h2>
                 <span class="material-symbols-outlined">person_add</span>
                 Add New Student
             </h2>
-            <p>Register a student with their subject scores</p>
+            <p>Register a student with personal details - add exam scores later from the edit page</p>
         </div>
 
         {% if error %}
@@ -46,38 +57,96 @@
 
         <div class="card">
             <form method="POST" action="/add" id="addStudentForm">
-                <div class="form-group">
-                    <label for="name">Student Name *</label>
-                    <input type="text" id="name" name="name" required placeholder="Enter student name">
-                </div>
+                <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined">person</span>
+                    Personal Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter student name">
+                    </div>
 
-                <div class="form-group">
-                    <label for="exam_name">Exam/Test Name *</label>
-                    <input type="text" id="exam_name" name="exam_name" placeholder="e.g., Initial Assessment" value="Initial Assessment" required>
-                </div>
-
-                <div id="subjects-container">
-                    <div class="subject-entry">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Subject *</label>
-                                <input type="text" name="subject_1" required placeholder="e.g., Math">
-                            </div>
-                            <div class="form-group">
-                                <label>Score *</label>
-                                <input type="number" name="score_1" min="0" max="100" required placeholder="0-100">
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="1" max="100" placeholder="Student age">
                     </div>
                 </div>
 
-                <button type="button" onclick="addSubjectField()" class="btn btn-secondary">
-                    <span class="material-symbols-outlined">add</span>
-                    Add Another Subject
-                </button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="grade">Grade/Class</label>
+                        <input type="text" id="grade" name="grade" placeholder="e.g., 10th Grade, Year 5">
+                    </div>
 
-                <div class="form-actions" style="margin-top: 2rem;">
+                    <div class="form-group">
+                        <label for="section">Section</label>
+                        <input type="text" id="section" name="section" placeholder="e.g., A, B, Science">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <h3 style="margin-top: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined">contact_mail</span>
+                    Contact Information
+                </h3>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="student@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="3" placeholder="Student's residential address"></textarea>
+                </div>
+
+                <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Add Student
+                    </button>
+                    <a href="{{ url_for('students') }}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="background: var(--md-sys-color-tertiary-container); border-left: 4px solid var(--md-sys-color-tertiary);">
+            <div style="display: flex; align-items: start; gap: 1rem;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-on-tertiary-container); font-size: 2rem;">info</span>
+                <div>
+                    <h4 style="margin: 0 0 0.5rem 0; color: var(--md-sys-color-on-tertiary-container);">Note</h4>
+                    <p style="margin: 0; color: var(--md-sys-color-on-tertiary-container);">
+                        After adding the student, you can add exam scores and manage their academic records from the student list page by clicking "Edit".
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ScoreSense. Intelligent student performance tracking.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
                         <span class="material-symbols-outlined">save</span>
                         Add Student
                     </button>

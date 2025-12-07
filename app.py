@@ -39,31 +39,35 @@ def students():
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
-    """Add new student."""
+    """Add new student with personal details only."""
     if request.method == 'POST':
         name = request.form.get('name')
-        exam_name = request.form.get('exam_name', 'Initial Assessment')
-        marks = {}
+        grade = request.form.get('grade')
+        section = request.form.get('section')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
         
-        # Get all form fields that start with 'subject_'
-        for key in request.form:
-            if key.startswith('subject_'):
-                subject = request.form[key]
-                score_key = key.replace('subject_', 'score_')
-                score = request.form.get(score_key)
-                
-                if subject and score:
-                    marks[subject.lower()] = int(score)
-        
-        if name and marks:
-            result = add_student(name, marks, exam_name)
+        if name:
+            result = add_student(
+                name=name,
+                grade=grade,
+                section=section,
+                age=int(age) if age else None,
+                gender=gender,
+                email=email,
+                phone=phone,
+                address=address
+            )
             if result:
                 return redirect(url_for('students'))
             else:
                 error = 'Student already exists'
                 return render_template('add_student.html', error=error)
         else:
-            error = 'Please provide name and at least one subject with score'
+            error = 'Please provide student name'
             return render_template('add_student.html', error=error)
     
     return render_template('add_student.html')
@@ -71,6 +75,8 @@ def add():
 @app.route('/edit/<int:student_id>', methods=['GET', 'POST'])
 def edit(student_id):
     """Edit student information and add new exam scores."""
+    from models.student_model import get_exams_grouped_by_name
+    
     student = get_student_by_id(student_id)
     
     if not student:
@@ -78,24 +84,32 @@ def edit(student_id):
     
     if request.method == 'POST':
         name = request.form.get('name')
-        exam_name = request.form.get('exam_name', 'Update')
-        marks = {}
+        grade = request.form.get('grade')
+        section = request.form.get('section')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
         
-        for key in request.form:
-            if key.startswith('subject_'):
-                subject = request.form[key]
-                score_key = key.replace('subject_', 'score_')
-                score = request.form.get(score_key)
-                
-                if subject and score:
-                    marks[subject.lower()] = int(score)
-        
-        if marks:
-            update_student(student_id, name=name, marks_dict=marks, exam_name=exam_name)
+        update_student(
+            student_id,
+            name=name if name else None,
+            grade=grade if grade else None,
+            section=section if section else None,
+            age=int(age) if age else None,
+            gender=gender if gender else None,
+            email=email if email else None,
+            phone=phone if phone else None,
+            address=address if address else None
+        )
         
         return redirect(url_for('students'))
     
-    return render_template('edit_student.html', student=student)
+    # Get existing exams for display
+    exams = get_exams_grouped_by_name(student_id)
+    
+    return render_template('edit_student.html', student=student, exams=exams)
 
 @app.route('/delete/<int:student_id>', methods=['POST'])
 def delete(student_id):

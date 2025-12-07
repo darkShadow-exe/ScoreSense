@@ -15,6 +15,13 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             marks TEXT NOT NULL,
+            grade TEXT,
+            section TEXT,
+            age INTEGER,
+            gender TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -38,13 +45,18 @@ def get_connection():
     """Get a database connection."""
     return sqlite3.connect(DB_PATH)
 
-def add_student(name, marks_dict, exam_name='Initial'):
+def add_student(name, grade=None, section=None, age=None, gender=None, email=None, phone=None, address=None):
     """
-    Add a new student with marks.
+    Add a new student with personal details only.
     Args:
         name: Student name
-        marks_dict: Dictionary of subject: score pairs
-        exam_name: Name of the exam/test
+        grade: Grade/Class
+        section: Section
+        age: Age
+        gender: Gender
+        email: Email address
+        phone: Phone number
+        address: Address
     Returns:
         Student ID if successful, None if student exists
     """
@@ -52,15 +64,15 @@ def add_student(name, marks_dict, exam_name='Initial'):
         conn = get_connection()
         cursor = conn.cursor()
         
-        marks_json = json.dumps(marks_dict)
-        cursor.execute('INSERT INTO students (name, marks) VALUES (?, ?)', (name, marks_json))
+        # Initialize with empty marks
+        marks_json = json.dumps({})
+        
+        cursor.execute('''
+            INSERT INTO students (name, marks, grade, section, age, gender, email, phone, address) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (name, marks_json, grade, section, age, gender, email, phone, address))
         
         student_id = cursor.lastrowid
-        
-        # Also add to exams table for tracking history
-        for subject, score in marks_dict.items():
-            cursor.execute('INSERT INTO exams (student_id, subject, score, exam_name) VALUES (?, ?, ?, ?)',
-                         (student_id, subject, float(score), exam_name))
         
         conn.commit()
         conn.close()
@@ -69,11 +81,11 @@ def add_student(name, marks_dict, exam_name='Initial'):
         return None
 
 def get_all_students():
-    """Get all students with their marks."""
+    """Get all students with their marks and details."""
     conn = get_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, name, marks FROM students ORDER BY name')
+    cursor.execute('SELECT id, name, marks, grade, section, age, gender, email, phone, address FROM students ORDER BY name')
     rows = cursor.fetchall()
     
     students = []
@@ -81,7 +93,14 @@ def get_all_students():
         students.append({
             'id': row[0],
             'name': row[1],
-            'marks': json.loads(row[2])
+            'marks': json.loads(row[2]),
+            'grade': row[3],
+            'section': row[4],
+            'age': row[5],
+            'gender': row[6],
+            'email': row[7],
+            'phone': row[8],
+            'address': row[9]
         })
     
     conn.close()
@@ -92,7 +111,7 @@ def get_student_by_id(student_id):
     conn = get_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, name, marks FROM students WHERE id = ?', (student_id,))
+    cursor.execute('SELECT id, name, marks, grade, section, age, gender, email, phone, address FROM students WHERE id = ?', (student_id,))
     row = cursor.fetchone()
     
     conn.close()
@@ -101,7 +120,14 @@ def get_student_by_id(student_id):
         return {
             'id': row[0],
             'name': row[1],
-            'marks': json.loads(row[2])
+            'marks': json.loads(row[2]),
+            'grade': row[3],
+            'section': row[4],
+            'age': row[5],
+            'gender': row[6],
+            'email': row[7],
+            'phone': row[8],
+            'address': row[9]
         }
     return None
 
@@ -110,7 +136,7 @@ def get_student_by_name(name):
     conn = get_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, name, marks FROM students WHERE LOWER(name) = LOWER(?)', (name,))
+    cursor.execute('SELECT id, name, marks, grade, section, age, gender, email, phone, address FROM students WHERE LOWER(name) = LOWER(?)', (name,))
     row = cursor.fetchone()
     
     conn.close()
@@ -119,23 +145,60 @@ def get_student_by_name(name):
         return {
             'id': row[0],
             'name': row[1],
-            'marks': json.loads(row[2])
+            'marks': json.loads(row[2]),
+            'grade': row[3],
+            'section': row[4],
+            'age': row[5],
+            'gender': row[6],
+            'email': row[7],
+            'phone': row[8],
+            'address': row[9]
         }
     return None
 
-def update_student(student_id, name=None, marks_dict=None, exam_name='Update'):
-    """Update student information and add new exam scores."""
+def update_student(student_id, name=None, grade=None, section=None, age=None, gender=None, email=None, phone=None, address=None, marks_dict=None, exam_name='Update'):
+    """Update student information and optionally add new exam scores."""
     conn = get_connection()
     cursor = conn.cursor()
     
-    if name:
-        cursor.execute('UPDATE students SET name = ? WHERE id = ?', (name, student_id))
+    # Update personal details
+    update_fields = []
+    update_values = []
     
+    if name is not None:
+        update_fields.append('name = ?')
+        update_values.append(name)
+    if grade is not None:
+        update_fields.append('grade = ?')
+        update_values.append(grade)
+    if section is not None:
+        update_fields.append('section = ?')
+        update_values.append(section)
+    if age is not None:
+        update_fields.append('age = ?')
+        update_values.append(age)
+    if gender is not None:
+        update_fields.append('gender = ?')
+        update_values.append(gender)
+    if email is not None:
+        update_fields.append('email = ?')
+        update_values.append(email)
+    if phone is not None:
+        update_fields.append('phone = ?')
+        update_values.append(phone)
+    if address is not None:
+        update_fields.append('address = ?')
+        update_values.append(address)
+    
+    if update_fields:
+        update_values.append(student_id)
+        cursor.execute(f'UPDATE students SET {", ".join(update_fields)} WHERE id = ?', update_values)
+    
+    # Add new exam records if marks provided
     if marks_dict:
         marks_json = json.dumps(marks_dict)
         cursor.execute('UPDATE students SET marks = ? WHERE id = ?', (marks_json, student_id))
         
-        # Add new exam records
         for subject, score in marks_dict.items():
             cursor.execute('INSERT INTO exams (student_id, subject, score, exam_name) VALUES (?, ?, ?, ?)',
                          (student_id, subject, float(score), exam_name))

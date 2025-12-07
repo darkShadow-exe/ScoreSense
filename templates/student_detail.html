@@ -58,6 +58,58 @@
             </h2>
         </div>
 
+        <!-- Student Profile -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">badge</span>
+                Student Profile
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                {% if stats.student.grade %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Grade/Class</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.grade }}</div>
+                </div>
+                {% endif %}
+                {% if stats.student.section %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Section</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.section }}</div>
+                </div>
+                {% endif %}
+                {% if stats.student.age %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Age</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.age }} years</div>
+                </div>
+                {% endif %}
+                {% if stats.student.gender %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Gender</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.gender }}</div>
+                </div>
+                {% endif %}
+                {% if stats.student.email %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Email</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.email }}</div>
+                </div>
+                {% endif %}
+                {% if stats.student.phone %}
+                <div class="profile-item">
+                    <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Phone</div>
+                    <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.phone }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% if stats.student.address %}
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                <div style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Address</div>
+                <div style="font-size: 1.1rem; font-weight: 500;">{{ stats.student.address }}</div>
+            </div>
+            {% endif %}
+        </div>
+
         <!-- Overall Statistics -->
         {% if stats.overall_stats %}
         <div class="card" style="margin-bottom: 2rem;">
@@ -109,31 +161,34 @@
             
             {% if stats.exams_by_name %}
                 {% for exam_name, exam_data in stats.exams_by_name.items() %}
-                <div class="exam-group" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--md-sys-color-surface-variant); border-radius: 16px; border-left: 4px solid var(--md-sys-color-primary);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h4 style="margin: 0; font-size: 1.25rem;">{{ exam_name }}</h4>
-                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem;">
-                            <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">calendar_today</span>
-                            {{ exam_data.date.split()[0] }}
-                        </span>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
-                        {% for subject_data in exam_data.subjects %}
-                        <div class="subject-score-card" style="padding: 1rem; background: var(--md-sys-color-surface); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 500; text-transform: capitalize;">{{ subject_data.subject }}</span>
-                            <span style="font-size: 1.5rem; font-weight: 700; color: var(--md-sys-color-primary);">{{ subject_data.score }}%</span>
+                <details class="accordion-item" {% if loop.first %}open{% endif %}>
+                    <summary class="accordion-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <strong style="font-size: 1.15rem;">{{ exam_name }}</strong>
+                            <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem;">
+                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">calendar_today</span>
+                                {{ exam_data.date.split()[0] }}
+                            </span>
                         </div>
-                        {% endfor %}
+                    </summary>
+                    <div class="accordion-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            {% for subject_data in exam_data.subjects %}
+                            <div class="subject-score-card" style="padding: 1rem; background: var(--md-sys-color-surface); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 500; text-transform: capitalize;">{{ subject_data.subject }}</span>
+                                <span style="font-size: 1.5rem; font-weight: 700; color: var(--md-sys-color-primary);">{{ subject_data.score }}%</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                            <span style="font-weight: 500;">Average: </span>
+                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--md-sys-color-tertiary);">
+                                {{ "%.1f"|format(exam_data.subjects|map(attribute='score')|sum / exam_data.subjects|length) }}%
+                            </span>
+                        </div>
                     </div>
-                    
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--md-sys-color-outline-variant);">
-                        <span style="font-weight: 500;">Average: </span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: var(--md-sys-color-tertiary);">
-                            {{ "%.1f"|format(exam_data.subjects|map(attribute='score')|sum / exam_data.subjects|length) }}%
-                        </span>
-                    </div>
-                </div>
+                </details>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
