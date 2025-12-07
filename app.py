@@ -450,12 +450,11 @@ def import_excel():
             return render_template('import_excel.html', error='Please upload an Excel file (.xlsx or .xls)')
         
         # Get options
-        api_key = request.form.get('api_key', '').strip()
         avoid_duplicates = request.form.get('avoid_duplicates') == 'on'
         
         # Import data
         from core.excel_import import import_excel_from_upload
-        stats = import_excel_from_upload(file, api_key if api_key else None, avoid_duplicates)
+        stats = import_excel_from_upload(file, avoid_duplicates)
         
         return render_template('import_excel.html', stats=stats)
     

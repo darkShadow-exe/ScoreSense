@@ -107,6 +107,15 @@
                 Upload Excel File
             </h3>
             
+            <div class="alert alert-info" style="margin-bottom: 20px;">
+                <strong>📋 Required Format:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li>Column 1: Student Name</li>
+                    <li>Column 2: Exam Name</li>
+                    <li>Columns 3+: Subject names with scores</li>
+                </ul>
+            </div>
+            
             <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="file">
@@ -127,18 +136,6 @@
                     </small>
                 </div>
 
-                <div class="form-group">
-                    <label for="api_key">
-                        <span class="material-symbols-outlined">key</span>
-                        OpenAI API Key (Optional - for better structure detection)
-                    </label>
-                    <input type="password" id="api_key" name="api_key" 
-                           placeholder="sk-... (leave blank to use pattern matching)">
-                    <small style="display: block; margin-top: 5px; color: var(--md-sys-color-on-surface-variant);">
-                        Providing an API key enables advanced AI-based structure understanding
-                    </small>
-                </div>
-
                 <button type="submit" class="btn btn-primary">
                     <span class="material-symbols-outlined">cloud_upload</span>
                     Upload and Import
@@ -154,18 +151,13 @@
             
             <div class="guide-list">
                 <div class="guide-item">
-                    <strong>📊 Any Structure Accepted:</strong>
-                    <span>The system automatically understands any Excel structure containing student names, exam names, subjects, and scores</span>
-                </div>
-                
-                <div class="guide-item">
-                    <strong>🤖 AI-Powered (Optional):</strong>
-                    <span>Provide an OpenAI API key for advanced structure detection, or use the built-in pattern matching</span>
+                    <strong>📊 Simple Structure Required:</strong>
+                    <span>First column: Student Name, Second column: Exam Name, Rest: Subjects with scores</span>
                 </div>
                 
                 <div class="guide-item">
                     <strong>👥 Auto-Student Creation:</strong>
-                    <span>If a student doesn't exist, they'll be created automatically with the name from the Excel file</span>
+                    <span>If a student doesn't exist, they'll be created automatically</span>
                 </div>
                 
                 <div class="guide-item">
@@ -178,11 +170,11 @@
         <div class="card">
             <h3>
                 <span class="material-symbols-outlined">table_chart</span>
-                Example Excel Formats
+                Required Excel Format
             </h3>
             
             <div style="margin-top: 15px;">
-                <h4 style="color: var(--md-sys-color-primary); margin-bottom: 10px;">Format 1: Wide Format (Subjects as Columns)</h4>
+                <h4 style="color: var(--md-sys-color-primary); margin-bottom: 10px;">Expected Structure:</h4>
                 <table class="example-table">
                     <thead>
                         <tr>
@@ -210,32 +202,9 @@
                         </tr>
                     </tbody>
                 </table>
-
-                <h4 style="color: var(--md-sys-color-primary); margin: 20px 0 10px;">Format 2: Simple Format</h4>
-                <table class="example-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Mathematics</th>
-                            <th>Science</th>
-                            <th>English</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Alice Johnson</td>
-                            <td>88</td>
-                            <td>92</td>
-                            <td>85</td>
-                        </tr>
-                        <tr>
-                            <td>Bob Williams</td>
-                            <td>76</td>
-                            <td>82</td>
-                            <td>79</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <small style="display: block; margin-top: 10px; color: var(--md-sys-color-on-surface-variant);">
+                    ⚠️ Column 1 must be student names, Column 2 must be exam names, remaining columns are subjects
+                </small>
             </div>
         </div>
     </div>
