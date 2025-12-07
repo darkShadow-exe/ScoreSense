@@ -434,6 +434,33 @@ def delete_exam_route(exam_id):
     delete_exam(exam_id)
     return redirect(request.referrer or url_for('students'))
 
+@app.route('/import', methods=['GET', 'POST'])
+def import_excel():
+    """Import data from Excel file."""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return render_template('import_excel.html', error='No file uploaded')
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return render_template('import_excel.html', error='No file selected')
+        
+        if not file.filename.endswith(('.xlsx', '.xls')):
+            return render_template('import_excel.html', error='Please upload an Excel file (.xlsx or .xls)')
+        
+        # Get options
+        api_key = request.form.get('api_key', '').strip()
+        avoid_duplicates = request.form.get('avoid_duplicates') == 'on'
+        
+        # Import data
+        from core.excel_import import import_excel_from_upload
+        stats = import_excel_from_upload(file, api_key if api_key else None, avoid_duplicates)
+        
+        return render_template('import_excel.html', stats=stats)
+    
+    return render_template('import_excel.html')
+
 if __name__ == '__main__':
     print("Starting Score Analyser Application...")
     print("Access the application at: http://127.0.0.1:5000")

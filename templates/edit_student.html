@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,33 +9,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body>
-    <nav>
+    <nav class="navbar">
         <div class="nav-container">
             <h1 class="logo">
                 <span class="material-symbols-outlined">analytics</span>
                 ScoreSense
             </h1>
-            <div class="nav-menu">
-                <a href="{{ url_for('index') }}">
-                    <span class="material-symbols-outlined">home</span>
-                    Home
-                </a>
-                <a href="{{ url_for('students') }}" class="active">
-                    <span class="material-symbols-outlined">group</span>
-                    Students
-                </a>
-                <a href="{{ url_for('stats') }}">
-                    <span class="material-symbols-outlined">query_stats</span>
-                    Stats
-                </a>
-                <a href="{{ url_for('command') }}">
-                    <span class="material-symbols-outlined">psychology</span>
-                    AI Commands
-                </a>
-            </div>
-            <button class="theme-toggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
-                <span class="material-symbols-outlined">dark_mode</span>
-            </button>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students" class="active">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+                <li><a href="/import">Import Excel</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                </li>
+            </ul>
         </div>
     </nav>
 

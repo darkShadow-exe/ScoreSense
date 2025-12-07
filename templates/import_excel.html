@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Excel - ScoreSense</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_m3.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">
+                <span class="material-symbols-outlined">analytics</span>
+                ScoreSense
+            </h1>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/students">Students</a></li>
+                <li><a href="/add">Add Student</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/command">Commands</a></li>
+                <li><a href="/import" class="active">Import Excel</a></li>
+                <li>
+                    <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>
+                <span class="material-symbols-outlined">upload_file</span>
+                Import Student Data from Excel
+            </h2>
+            <p>Upload an Excel file with student exam data - any structure will be understood automatically</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            <span class="material-symbols-outlined">error</span>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if stats %}
+        <div class="card success-card">
+            <h3>
+                <span class="material-symbols-outlined">check_circle</span>
+                Import Completed Successfully
+            </h3>
+            
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-item">
+                    <span class="stat-label">Total Records</span>
+                    <span class="stat-value">{{ stats.total_records }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">New Students</span>
+                    <span class="stat-value" style="color: var(--md-sys-color-primary);">{{ stats.students_added }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Existing Students</span>
+                    <span class="stat-value">{{ stats.students_updated }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Exams Added</span>
+                    <span class="stat-value" style="color: var(--md-sys-color-tertiary);">{{ stats.exams_added }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Duplicates Skipped</span>
+                    <span class="stat-value" style="color: var(--md-sys-color-secondary);">{{ stats.duplicates_skipped }}</span>
+                </div>
+            </div>
+
+            {% if stats.errors %}
+            <div class="alert alert-warning" style="margin-top: 20px;">
+                <strong>Errors encountered:</strong>
+                <ul style="margin: 10px 0 0 20px;">
+                    {% for error in stats.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 20px;">
+                <a href="/students" class="btn btn-primary">
+                    <span class="material-symbols-outlined">group</span>
+                    View Students
+                </a>
+                <a href="/import" class="btn btn-secondary">
+                    <span class="material-symbols-outlined">upload_file</span>
+                    Import Another File
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">description</span>
+                Upload Excel File
+            </h3>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">
+                        <span class="material-symbols-outlined">attach_file</span>
+                        Select Excel File (.xlsx or .xls)
+                    </label>
+                    <input type="file" id="file" name="file" accept=".xlsx,.xls" required 
+                           style="padding: 10px; border: 2px dashed var(--md-sys-color-outline); border-radius: 12px; width: 100%;">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="avoid_duplicates" checked>
+                        Avoid duplicate exam entries
+                    </label>
+                    <small style="display: block; margin-top: 5px; color: var(--md-sys-color-on-surface-variant);">
+                        Skip exam entries that already exist for a student
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="api_key">
+                        <span class="material-symbols-outlined">key</span>
+                        OpenAI API Key (Optional - for better structure detection)
+                    </label>
+                    <input type="password" id="api_key" name="api_key" 
+                           placeholder="sk-... (leave blank to use pattern matching)">
+                    <small style="display: block; margin-top: 5px; color: var(--md-sys-color-on-surface-variant);">
+                        Providing an API key enables advanced AI-based structure understanding
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    Upload and Import
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">info</span>
+                How It Works
+            </h3>
+            
+            <div class="guide-list">
+                <div class="guide-item">
+                    <strong>📊 Any Structure Accepted:</strong>
+                    <span>The system automatically understands any Excel structure containing student names, exam names, subjects, and scores</span>
+                </div>
+                
+                <div class="guide-item">
+                    <strong>🤖 AI-Powered (Optional):</strong>
+                    <span>Provide an OpenAI API key for advanced structure detection, or use the built-in pattern matching</span>
+                </div>
+                
+                <div class="guide-item">
+                    <strong>👥 Auto-Student Creation:</strong>
+                    <span>If a student doesn't exist, they'll be created automatically with the name from the Excel file</span>
+                </div>
+                
+                <div class="guide-item">
+                    <strong>🔄 Duplicate Detection:</strong>
+                    <span>Optionally skip duplicate exam entries to avoid data redundancy</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">table_chart</span>
+                Example Excel Formats
+            </h3>
+            
+            <div style="margin-top: 15px;">
+                <h4 style="color: var(--md-sys-color-primary); margin-bottom: 10px;">Format 1: Wide Format (Subjects as Columns)</h4>
+                <table class="example-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Exam</th>
+                            <th>Math</th>
+                            <th>Physics</th>
+                            <th>Chemistry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>Midterm</td>
+                            <td>85</td>
+                            <td>78</td>
+                            <td>92</td>
+                        </tr>
+                        <tr>
+                            <td>Jane Doe</td>
+                            <td>Midterm</td>
+                            <td>90</td>
+                            <td>88</td>
+                            <td>95</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 style="color: var(--md-sys-color-primary); margin: 20px 0 10px;">Format 2: Simple Format</h4>
+                <table class="example-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Mathematics</th>
+                            <th>Science</th>
+                            <th>English</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alice Johnson</td>
+                            <td>88</td>
+                            <td>92</td>
+                            <td>85</td>
+                        </tr>
+                        <tr>
+                            <td>Bob Williams</td>
+                            <td>76</td>
+                            <td>82</td>
+                            <td>79</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>ScoreSense © 2025</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <style>
+        .success-card {
+            background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-tertiary-container) 100%);
+            border-left: 4px solid var(--md-sys-color-primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: var(--md-sys-color-surface);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .example-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: var(--md-sys-color-surface);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .example-table th,
+        .example-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+        }
+
+        .example-table th {
+            background: var(--md-sys-color-surface-variant);
+            font-weight: 600;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .example-table tbody tr:hover {
+            background: var(--md-sys-color-surface-variant);
+        }
+
+        input[type="file"] {
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--md-sys-color-primary);
+        }
+    </style>
+</body>
+</html>
