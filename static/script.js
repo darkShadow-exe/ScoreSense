@@ -145,3 +145,137 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Speech Recognition for Command Input
+let recognition = null;
+let isListening = false;
+
+function initSpeechRecognition() {
+    // Check if browser supports Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        console.warn('Speech recognition not supported in this browser');
+        return null;
+    }
+    
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    return recognition;
+}
+
+function startSpeechRecognition() {
+    const commandTextarea = document.getElementById('command');
+    const micBtn = document.getElementById('mic-btn');
+    const statusDiv = document.getElementById('speech-status');
+    
+    if (!commandTextarea || !micBtn) return;
+    
+    if (!recognition) {
+        recognition = initSpeechRecognition();
+        if (!recognition) {
+            statusDiv.textContent = '❌ Speech recognition not supported in your browser';
+            statusDiv.className = 'speech-status error';
+            setTimeout(() => statusDiv.textContent = '', 3000);
+            return;
+        }
+    }
+    
+    if (isListening) {
+        recognition.stop();
+        return;
+    }
+    
+    // Start listening
+    try {
+        recognition.start();
+        isListening = true;
+        micBtn.classList.add('listening');
+        statusDiv.textContent = '🎤 Listening...';
+        statusDiv.className = 'speech-status listening';
+        
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript;
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            // Show interim results
+            if (interimTranscript) {
+                statusDiv.textContent = `📝 ${interimTranscript}`;
+            }
+            
+            // Set final transcript to textarea
+            if (finalTranscript) {
+                commandTextarea.value = finalTranscript.trim();
+                statusDiv.textContent = '✅ Transcription complete';
+                statusDiv.className = 'speech-status success';
+                setTimeout(() => statusDiv.textContent = '', 2000);
+            }
+        };
+        
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            isListening = false;
+            micBtn.classList.remove('listening');
+            
+            let errorMessage = '❌ ';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage += 'No speech detected. Please try again.';
+                    break;
+                case 'audio-capture':
+                    errorMessage += 'Microphone not found or not allowed.';
+                    break;
+                case 'not-allowed':
+                    errorMessage += 'Microphone access denied. Please allow microphone access.';
+                    break;
+                default:
+                    errorMessage += `Error: ${event.error}`;
+            }
+            
+            statusDiv.textContent = errorMessage;
+            statusDiv.className = 'speech-status error';
+            setTimeout(() => statusDiv.textContent = '', 4000);
+        };
+        
+        recognition.onend = () => {
+            isListening = false;
+            micBtn.classList.remove('listening');
+            if (statusDiv.textContent === '🎤 Listening...') {
+                statusDiv.textContent = '';
+            }
+        };
+        
+    } catch (error) {
+        console.error('Error starting speech recognition:', error);
+        statusDiv.textContent = '❌ Could not start speech recognition';
+        statusDiv.className = 'speech-status error';
+        setTimeout(() => statusDiv.textContent = '', 3000);
+    }
+}
+
+// Initialize speech recognition when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const micBtn = document.getElementById('mic-btn');
+        if (micBtn) {
+            micBtn.addEventListener('click', startSpeechRecognition);
+        }
+    });
+} else {
+    const micBtn = document.getElementById('mic-btn');
+    if (micBtn) {
+        micBtn.addEventListener('click', startSpeechRecognition);
+    }
+}

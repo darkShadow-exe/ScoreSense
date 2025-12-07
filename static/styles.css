@@ -732,6 +732,91 @@ body {
     margin-bottom: 15px;
 }
 
+/* Command Input with Microphone */
+.command-input-wrapper {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.command-input-wrapper textarea {
+    flex: 1;
+}
+
+.mic-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.mic-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mic-button:active {
+    transform: translateY(0);
+}
+
+.mic-button.listening {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    }
+}
+
+.mic-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.speech-status {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-height: 20px;
+    transition: all 0.3s ease;
+}
+
+.speech-status.listening {
+    background: #e3f2fd;
+    color: #1976d2;
+    border-left: 4px solid #1976d2;
+}
+
+.speech-status.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+.speech-status.error {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
+}
+
 /* Footer */
 footer {
     text-align: center;
