@@ -10,9 +10,13 @@ def parse_command(text):
     """
     text = text.strip().lower()
     
-    # Intent: ADD_STUDENT
-    if any(word in text for word in ['add', 'create', 'insert', 'new student']):
-        return parse_add_student(text)
+    # Intent: ADD_EXAM (must check before ADD_STUDENT)
+    if any(phrase in text for phrase in ['add exam', 'add complete exam', 'add test', 'new exam']):
+        return parse_add_exam(text)
+    
+    # Intent: ADD_STUDENT (profile only)
+    elif any(word in text for word in ['add student', 'create student', 'new student', 'register student']):
+        return parse_add_student_profile(text)
     
     # Intent: UPDATE_STUDENT
     elif any(word in text for word in ['update', 'edit', 'modify', 'change']):
@@ -45,7 +49,7 @@ def parse_command(text):
     else:
         return {
             'intent': 'UNKNOWN',
-            'error': 'Could not understand the command. Try commands like: "Add John with 90 in math", "Show class topper", "Predict Sarah\'s math score"'
+            'error': 'Could not understand the command. Try: "Add student John in grade 10 section A", "Add exam for John: Midterm with math 90, physics 85", "Show class topper", "Predict Sarah\'s math score"'
         }
 
 def extract_name(text):
@@ -107,20 +111,97 @@ def extract_subject(text):
     
     return None
 
-def parse_add_student(text):
-    """Parse ADD_STUDENT command."""
+def extract_profile_fields(text):
+    """Extract profile fields like grade, section, age, gender from text."""
+    profile = {}
+    
+    # Extract grade: "grade 10", "in grade 11"
+    grade_match = re.search(r'(?:in\s+)?grade\s+(\d+|[a-z]+)', text, re.IGNORECASE)
+    if grade_match:
+        profile['grade'] = grade_match.group(1)
+    
+    # Extract section: "section A", "section B"
+    section_match = re.search(r'section\s+([a-z])', text, re.IGNORECASE)
+    if section_match:
+        profile['section'] = section_match.group(1).upper()
+    
+    # Extract age: "age 15", "15 years old"
+    age_match = re.search(r'(?:age\s+)?(\d+)(?:\s+years)?', text)
+    if age_match:
+        profile['age'] = int(age_match.group(1))
+    
+    # Extract gender: "male", "female"
+    if 'male' in text and 'female' not in text:
+        profile['gender'] = 'Male'
+    elif 'female' in text:
+        profile['gender'] = 'Female'
+    
+    # Extract email: basic pattern
+    email_match = re.search(r'([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})', text, re.IGNORECASE)
+    if email_match:
+        profile['email'] = email_match.group(1)
+    
+    # Extract phone: 10 digits
+    phone_match = re.search(r'(\d{10})', text)
+    if phone_match:
+        profile['phone'] = phone_match.group(1)
+    
+    return profile
+
+def extract_exam_name(text):
+    """Extract exam name from text."""
+    # Pattern: "exam NAME with", "test NAME:", after "for NAME:"
+    patterns = [
+        r'exam\s+([a-z\s]+?)(?:with|:)',
+        r'test\s+([a-z\s]+?)(?:with|:)',
+        r'for\s+[a-z]+:\s*([a-z\s]+?)(?:with|:)',
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            exam_name = match.group(1).strip()
+            if len(exam_name) > 2:
+                return exam_name.title()
+    
+    return 'General Exam'
+
+def parse_add_student_profile(text):
+    """Parse ADD_STUDENT command (profile only, no exams)."""
     name = extract_name(text)
-    marks = extract_marks(text)
+    profile = extract_profile_fields(text)
     
     if not name:
         return {'intent': 'ADD_STUDENT', 'error': 'Could not extract student name'}
     
-    if not marks:
-        return {'intent': 'ADD_STUDENT', 'error': 'Could not extract marks. Use format: "Add John with 90 in math and 85 in physics"'}
-    
     return {
         'intent': 'ADD_STUDENT',
         'name': name,
+        'grade': profile.get('grade', ''),
+        'section': profile.get('section', ''),
+        'age': profile.get('age', ''),
+        'gender': profile.get('gender', ''),
+        'email': profile.get('email', ''),
+        'phone': profile.get('phone', ''),
+        'address': ''  # Not extractable from simple commands
+    }
+
+def parse_add_exam(text):
+    """Parse ADD_EXAM command (add complete exam with all subjects)."""
+    name = extract_name(text)
+    exam_name = extract_exam_name(text)
+    marks = extract_marks(text)
+    
+    if not name:
+        return {'intent': 'ADD_EXAM', 'error': 'Could not extract student name'}
+    
+    if not marks:
+        return {'intent': 'ADD_EXAM', 'error': 'Could not extract marks. Use format: "Add exam for John: Midterm with math 90, physics 85"'}
+    
+    return {
+        'intent': 'ADD_EXAM',
+        'name': name,
+        'exam_name': exam_name,
         'marks': marks
     }
 
@@ -212,11 +293,12 @@ def parse_compare(text):
 # Test examples
 if __name__ == '__main__':
     test_commands = [
-        "Add Krish with 95 in math and 80 in physics",
+        "Add student Krish in grade 10 section A",
+        "Add exam for Krish: Midterm with math 95, physics 80, chemistry 88",
         "Show me the class topper",
         "Predict Sneha's next math score",
         "Compare scores of the class in chemistry",
-        "Update John with 88 in physics",
+        "Update John's email to john@school.com",
         "Delete Sarah",
         "Show class average",
     ]

@@ -43,7 +43,7 @@
                     <label for="command">Enter Your Command</label>
                     <div class="command-input-wrapper">
                         <textarea id="command" name="command" rows="3" 
-                                  placeholder="Type or speak a command like: 'Add Sarah with 92 in math and 88 in physics'"
+                                  placeholder="Type or speak a command like: 'Add student Sarah in grade 10 section A' or 'Add exam for Sarah: Midterm with math 92, physics 88'"
                                   required></textarea>
                         <button type="button" id="mic-btn" class="mic-button" title="Click to speak">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,10 +179,16 @@
             <h3>💡 Example Commands</h3>
             <div class="examples-grid">
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Add John with 90 in math and 85 in physics</code>
+                    <code>Add student John in grade 10 section A</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Update Sarah with 95 in chemistry</code>
+                    <code>Add exam for John: Midterm with math 90, physics 85, chemistry 88</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Add student Sarah in grade 11 section B age 16</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Add exam for Sarah: Finals with math 95, physics 92</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
                     <code>Show class topper</code>
@@ -212,12 +218,16 @@
             <h3>📖 Command Guide</h3>
             <div class="guide-list">
                 <div class="guide-item">
-                    <strong>Add Student:</strong>
-                    <span>"Add [Name] with [Score] in [Subject] and [Score] in [Subject]"</span>
+                    <strong>Add Student Profile:</strong>
+                    <span>"Add student [Name] in grade [Grade] section [Section]"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Update Student:</strong>
-                    <span>"Update [Name] with [Score] in [Subject]"</span>
+                    <strong>Add Exam:</strong>
+                    <span>"Add exam for [Name]: [Exam Name] with [Subject] [Score], [Subject] [Score]"</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Update Profile:</strong>
+                    <span>"Update [Name] with email [Email]" or "Update [Name] with grade [Grade]"</span>
                 </div>
                 <div class="guide-item">
                     <strong>Delete Student:</strong>

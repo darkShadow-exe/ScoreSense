@@ -147,36 +147,76 @@ def execute_command(parsed):
     if 'error' in parsed:
         return {'error': parsed['error'], 'intent': intent}
     
-    # ADD_STUDENT
+    # ADD_STUDENT (profile only)
     if intent == 'ADD_STUDENT':
         name = parsed['name']
-        marks = parsed['marks']
+        grade = parsed.get('grade', '')
+        section = parsed.get('section', '')
+        age = parsed.get('age', '')
+        gender = parsed.get('gender', '')
+        email = parsed.get('email', '')
+        phone = parsed.get('phone', '')
+        address = parsed.get('address', '')
         
-        student_id = add_student(name, marks, 'Voice Command')
+        student_id = add_student(name, grade, section, age, gender, email, phone, address)
         if student_id:
+            profile_info = f" (Grade: {grade}, Section: {section})" if grade or section else ""
             return {
                 'success': True,
-                'message': f'Successfully added {name} with marks: {marks}',
-                'student': {'name': name, 'marks': marks}
+                'message': f'Successfully added student {name}{profile_info}. You can now add exams for this student.',
+                'student': {'name': name, 'grade': grade, 'section': section}
             }
         else:
             return {'error': f'Student {name} already exists'}
     
-    # UPDATE_STUDENT
-    elif intent == 'UPDATE_STUDENT':
+    # ADD_EXAM (add complete exam for existing student)
+    elif intent == 'ADD_EXAM':
         name = parsed['name']
+        exam_name = parsed['exam_name']
         marks = parsed['marks']
         
         student = get_student_by_name(name)
         if student:
-            # Merge new marks with existing
-            updated_marks = {**student['marks'], **marks}
-            update_student(student['id'], marks_dict=updated_marks, exam_name='Voice Update')
+            add_complete_exam(student['id'], exam_name, marks)
             return {
                 'success': True,
-                'message': f'Updated {name}. New marks: {updated_marks}',
-                'student': {'name': name, 'marks': updated_marks}
+                'message': f'Successfully added {exam_name} for {name} with marks: {marks}',
+                'student': {'name': name, 'exam_name': exam_name, 'marks': marks}
             }
+        else:
+            return {'error': f'Student {name} not found. Please add the student first.'}
+    
+    # UPDATE_STUDENT
+    elif intent == 'UPDATE_STUDENT':
+        name = parsed['name']
+        marks = parsed.get('marks', {})
+        
+        student = get_student_by_name(name)
+        if student:
+            # Check if profile fields are being updated
+            profile_fields = {}
+            for field in ['grade', 'section', 'age', 'gender', 'email', 'phone', 'address']:
+                if field in parsed and parsed[field]:
+                    profile_fields[field] = parsed[field]
+            
+            if profile_fields:
+                # Update profile
+                update_student(student['id'], **profile_fields)
+                return {
+                    'success': True,
+                    'message': f'Updated {name}\'s profile: {profile_fields}',
+                    'student': {'name': name, 'updates': profile_fields}
+                }
+            elif marks:
+                # Add new exam with updated marks
+                add_complete_exam(student['id'], 'Voice Update', marks)
+                return {
+                    'success': True,
+                    'message': f'Added new exam for {name} with marks: {marks}',
+                    'student': {'name': name, 'marks': marks}
+                }
+            else:
+                return {'error': 'No update information provided'}
         else:
             return {'error': f'Student {name} not found'}
     
