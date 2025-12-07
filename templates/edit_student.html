@@ -1,56 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Student - ScoreSense</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles_m3.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
+    <nav>
         <div class="nav-container">
             <h1 class="logo">
                 <span class="material-symbols-outlined">analytics</span>
                 ScoreSense
             </h1>
-            <ul class="nav-menu">
-                <li><a href="/">Dashboard</a></li>
-                <li><a href="/students" class="active">Students</a></li>
-                <li><a href="/add">Add Student</a></li>
-                <li><a href="/stats">Statistics</a></li>
-                <li><a href="/command">Commands</a></li>
-                <li>
-                    <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
-                        <span class="material-symbols-outlined">dark_mode</span>
-                    </button>
-                </li>
-            </ul>
+            <div class="nav-menu">
+                <a href="{{ url_for('index') }}">
+                    <span class="material-symbols-outlined">home</span>
+                    Home
+                </a>
+                <a href="{{ url_for('students') }}" class="active">
+                    <span class="material-symbols-outlined">group</span>
+                    Students
+                </a>
+                <a href="{{ url_for('stats') }}">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    Stats
+                </a>
+                <a href="{{ url_for('command') }}">
+                    <span class="material-symbols-outlined">psychology</span>
+                    AI Commands
+                </a>
+            </div>
+            <button class="theme-toggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
+                <span class="material-symbols-outlined">dark_mode</span>
+            </button>
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+            <a href="{{ url_for('students') }}" class="btn btn-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back
+            </a>
+            <a href="{{ url_for('student_stats', student_id=student.id) }}" class="btn btn-primary">
+                <span class="material-symbols-outlined">analytics</span>
+                View Detailed Stats
+            </a>
+        </div>
+
         <div class="page-header">
             <h2>
                 <span class="material-symbols-outlined">edit</span>
-                Edit Student: {{ student.name }}
+                Edit: {{ student.name }}
             </h2>
-            <p>Update student information and add exam scores</p>
+            <p>Manage exam scores and student information</p>
         </div>
 
-        <div class="card">
-            <h3>Current Scores</h3>
-            <form method="POST" action="/edit/{{ student.id }}">
+        <!-- Existing Exams Section -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">history_edu</span>
+                Exam History
+            </h3>
+            
+            {% set exams_by_name = [] %}
+            {% if student.id %}
+                <!-- Get exams grouped by exam name -->
+                {{ exams_by_name.append(1) or "" }}
+            {% endif %}
+            
+            <div id="existing-exams">
+                <!-- This will be populated via JavaScript or server-side -->
+                <p style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 2rem;">
+                    <span class="material-symbols-outlined" style="font-size: 3rem; opacity: 0.5;">folder_open</span><br>
+                    Exam history will be displayed here. View the detailed stats page to see all exams.
+                </p>
+            </div>
+        </div>
+
+        <!-- Add New Complete Exam -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">add_circle</span>
+                Add New Complete Exam
+            </h3>
+            <p style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 1.5rem;">
+                Add a full exam with all subjects at once
+            </p>
+
+            <form method="POST" action="/student/{{ student.id }}/add_complete_exam" id="newExamForm">
                 <div class="form-group">
-                    <label for="name">Student Name *</label>
-                    <input type="text" id="name" name="name" value="{{ student.name }}" required>
+                    <label for="new_exam_name">Exam/Test Name *</label>
+                    <input type="text" id="new_exam_name" name="exam_name" placeholder="e.g., Midterm Exam, Quiz 2, Final" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="exam_name">Exam/Test Name *</label>
-                    <input type="text" id="exam_name" name="exam_name" placeholder="e.g., Midterm, Quiz 1, Final" required>
-                </div>
-
-                <div id="subjects-container">
+                <div id="new-subjects-container">
                     {% set count = [0] %}
                     {% for subject, score in student.marks.items() %}
                     {% set _ = count.append(count.pop() + 1) %}
@@ -62,58 +109,101 @@
                             </div>
                             <div class="form-group">
                                 <label>Score</label>
-                                <input type="number" name="score_{{ count[0] }}" value="{{ score }}" 
-                                       min="0" max="100" required>
+                                <input type="number" name="score_{{ count[0] }}" placeholder="0-100" 
+                                       min="0" max="100" step="0.1" required>
                             </div>
+                            {% if count[0] > 1 %}
+                            <button type="button" onclick="this.closest('.subject-entry').remove()" class="btn-remove" title="Remove subject">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
                 </div>
 
-                <button type="button" onclick="addSubjectField()" class="btn btn-secondary">
+                <button type="button" onclick="addNewSubjectField()" class="btn btn-secondary" style="margin-top: 1rem;">
                     <span class="material-symbols-outlined">add</span>
                     Add Another Subject
                 </button>
 
-                <div class="form-actions" style="margin-top: 2rem;">
+                <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
                         <span class="material-symbols-outlined">save</span>
-                        Update Student
+                        Save Complete Exam
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Update Student Info -->
+        <div class="card">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-outlined">person</span>
+                Update Student Information
+            </h3>
+
+            <form method="POST" action="/edit/{{ student.id }}">
+                <div class="form-group">
+                    <label for="name">Student Name *</label>
+                    <input type="text" id="name" name="name" value="{{ student.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="exam_name">Quick Add Exam Name (Optional)</label>
+                    <input type="text" id="exam_name" name="exam_name" placeholder="Leave blank to only update name">
+                </div>
+
+                <div id="subjects-container">
+                    <p style="color: var(--md-sys-color-on-surface-variant); font-size: 0.9rem; margin-bottom: 1rem;">
+                        Use the "Add New Complete Exam" section above for better organization
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Update Name
                     </button>
                     <a href="/students" class="btn btn-outline">Cancel</a>
                 </div>
             </form>
         </div>
-    </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ScoreSense. Intelligent student performance tracking.</p>
+    </footer>
 
     <script>
-        let subjectCount = {{ student.marks|length }};
+        let newSubjectCount = {{ student.marks|length }};
 
-        function addSubjectField() {
-            subjectCount++;
-            const container = document.getElementById('subjects-container');
+        function addNewSubjectField() {
+            newSubjectCount++;
+            const container = document.getElementById('new-subjects-container');
             const newEntry = document.createElement('div');
             newEntry.className = 'subject-entry';
             newEntry.innerHTML = `
                 <div class="form-row">
                     <div class="form-group">
                         <label>Subject</label>
-                        <input type="text" name="subject_${subjectCount}" placeholder="e.g., Physics">
+                        <input type="text" name="subject_${newSubjectCount}" placeholder="e.g., Physics" required>
                     </div>
                     <div class="form-group">
                         <label>Score</label>
-                        <input type="number" name="score_${subjectCount}" min="0" max="100" placeholder="0-100">
+                        <input type="number" name="score_${newSubjectCount}" min="0" max="100" step="0.1" placeholder="0-100" required>
                     </div>
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="btn-remove">✕</button>
+                    <button type="button" onclick="this.closest('.subject-entry').remove()" class="btn-remove" title="Remove subject">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
             `;
             container.appendChild(newEntry);
         }
-    </script>
 
-    <footer>
-        <p>Score Analyser © 2025</p>
-    </footer>
+        // Initialize dark mode
+        initDarkMode();
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

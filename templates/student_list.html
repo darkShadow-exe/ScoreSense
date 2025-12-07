@@ -76,10 +76,21 @@
                                 {% endif %}
                             </td>
                             <td class="actions">
-                                <a href="/edit/{{ student.id }}" class="btn-small btn-edit">Edit</a>
+                                <a href="/student/{{ student.id }}/stats" class="btn-small btn-primary" title="View detailed statistics">
+                                    <span class="material-symbols-outlined">analytics</span>
+                                    Details
+                                </a>
+                                <a href="/edit/{{ student.id }}" class="btn-small btn-edit" title="Edit student">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Edit
+                                </a>
                                 <form method="POST" action="/delete/{{ student.id }}" style="display: inline;">
                                     <button type="submit" class="btn-small btn-delete" 
-                                            onclick="return confirm('Delete {{ student.name }}?')">Delete</button>
+                                            onclick="return confirm('Delete {{ student.name }}?')"
+                                            title="Delete student">
+                                        <span class="material-symbols-outlined">delete</span>
+                                        Delete
+                                    </button>
                                 </form>
                             </td>
                         </tr>

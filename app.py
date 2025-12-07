@@ -318,6 +318,17 @@ def student_exams(student_id):
     exams = get_all_exams_for_student(student_id)
     return jsonify({'student': student, 'exams': exams})
 
+@app.route('/student/<int:student_id>/stats')
+def student_stats(student_id):
+    """Show detailed statistics for a specific student."""
+    from models.student_model import get_student_detailed_stats
+    
+    stats = get_student_detailed_stats(student_id)
+    if not stats:
+        return redirect(url_for('students'))
+    
+    return render_template('student_detail.html', stats=stats)
+
 @app.route('/student/<int:student_id>/add_exam', methods=['POST'])
 def add_exam(student_id):
     """Add a new exam score for a student."""
@@ -327,6 +338,28 @@ def add_exam(student_id):
     
     if subject and score:
         add_exam_score(student_id, subject, float(score), exam_name)
+    
+    return redirect(url_for('edit', student_id=student_id))
+
+@app.route('/student/<int:student_id>/add_complete_exam', methods=['POST'])
+def add_complete_exam_route(student_id):
+    """Add a complete exam with all subjects."""
+    from models.student_model import add_complete_exam
+    
+    exam_name = request.form.get('exam_name', 'New Exam')
+    marks = {}
+    
+    for key in request.form:
+        if key.startswith('subject_'):
+            subject = request.form[key]
+            score_key = key.replace('subject_', 'score_')
+            score = request.form.get(score_key)
+            
+            if subject and score:
+                marks[subject.lower()] = float(score)
+    
+    if marks:
+        add_complete_exam(student_id, exam_name, marks)
     
     return redirect(url_for('edit', student_id=student_id))
 

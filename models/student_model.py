@@ -202,6 +202,105 @@ def get_all_exams_for_student(student_id):
     
     return exams_by_subject
 
+def get_exams_grouped_by_name(student_id):
+    """Get all exams for a student grouped by exam name."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT id, subject, score, exam_name, exam_date 
+        FROM exams 
+        WHERE student_id = ?
+        ORDER BY exam_date DESC, exam_name, subject
+    ''', (student_id,))
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    exams_by_name = {}
+    for row in rows:
+        exam_name = row[3]
+        if exam_name not in exams_by_name:
+            exams_by_name[exam_name] = {
+                'date': row[4],
+                'subjects': []
+            }
+        exams_by_name[exam_name]['subjects'].append({
+            'id': row[0],
+            'subject': row[1],
+            'score': row[2]
+        })
+    
+    return exams_by_name
+
+def add_complete_exam(student_id, exam_name, marks_dict):
+    """Add a complete exam with multiple subjects at once."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    for subject, score in marks_dict.items():
+        cursor.execute('INSERT INTO exams (student_id, subject, score, exam_name) VALUES (?, ?, ?, ?)',
+                     (student_id, subject, float(score), exam_name))
+    
+    # Update the student's current marks with latest scores
+    student = get_student_by_id(student_id)
+    if student:
+        student['marks'].update(marks_dict)
+        marks_json = json.dumps(student['marks'])
+        cursor.execute('UPDATE students SET marks = ? WHERE id = ?', (marks_json, student_id))
+    
+    conn.commit()
+    conn.close()
+    return True
+
+def get_student_detailed_stats(student_id):
+    """Get comprehensive statistics for a specific student."""
+    from utils.stats import calculate_stats, get_trend
+    
+    student = get_student_by_id(student_id)
+    if not student:
+        return None
+    
+    exams_by_subject = get_all_exams_for_student(student_id)
+    exams_by_name = get_exams_grouped_by_name(student_id)
+    
+    # Calculate stats per subject
+    subject_stats = {}
+    for subject, exams in exams_by_subject.items():
+        scores = [exam['score'] for exam in exams]
+        if scores:
+            subject_stats[subject] = {
+                'average': sum(scores) / len(scores),
+                'highest': max(scores),
+                'lowest': min(scores),
+                'trend': get_trend(scores),
+                'exam_count': len(scores),
+                'latest': scores[0] if scores else 0
+            }
+    
+    # Overall stats
+    all_scores = []
+    for subject_exams in exams_by_subject.values():
+        all_scores.extend([exam['score'] for exam in subject_exams])
+    
+    overall_stats = {}
+    if all_scores:
+        overall_stats = {
+            'average': sum(all_scores) / len(all_scores),
+            'highest': max(all_scores),
+            'lowest': min(all_scores),
+            'total_exams': len(all_scores),
+            'subjects_count': len(exams_by_subject)
+        }
+    
+    return {
+        'student': student,
+        'exams_by_subject': exams_by_subject,
+        'exams_by_name': exams_by_name,
+        'subject_stats': subject_stats,
+        'overall_stats': overall_stats
+    }
+
 def add_exam_score(student_id, subject, score, exam_name='Test'):
     """Add a new exam score for a student."""
     conn = get_connection()
