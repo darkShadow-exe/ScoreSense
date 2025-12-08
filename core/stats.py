@@ -6,8 +6,10 @@ import os
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'db', 'students.db')
 
 def get_connection():
-    """Get a database connection."""
-    return sqlite3.connect(DB_PATH)
+    """Get a database connection with timeout and autocommit."""
+    # Use isolation_level=None for autocommit mode to prevent locks
+    conn = sqlite3.connect(DB_PATH, timeout=30.0, isolation_level=None)
+    return conn
 
 def get_class_average():
     """Calculate overall class average across all subjects from exams table."""

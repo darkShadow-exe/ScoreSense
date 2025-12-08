@@ -42,8 +42,10 @@ def init_db():
     conn.close()
 
 def get_connection():
-    """Get a database connection."""
-    return sqlite3.connect(DB_PATH)
+    """Get a database connection with timeout and autocommit."""
+    # Use isolation_level=None for autocommit mode to prevent locks
+    conn = sqlite3.connect(DB_PATH, timeout=30.0, isolation_level=None)
+    return conn
 
 def add_student(name, grade=None, section=None, age=None, gender=None, email=None, phone=None, address=None):
     """
@@ -60,6 +62,7 @@ def add_student(name, grade=None, section=None, age=None, gender=None, email=Non
     Returns:
         Student ID if successful, None if student exists
     """
+    conn = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -73,12 +76,12 @@ def add_student(name, grade=None, section=None, age=None, gender=None, email=Non
         ''', (name, marks_json, grade, section, age, gender, email, phone, address))
         
         student_id = cursor.lastrowid
-        
-        conn.commit()
-        conn.close()
         return student_id
     except sqlite3.IntegrityError:
         return None
+    finally:
+        if conn:
+            conn.close()
 
 def get_student_average(student_id):
     """Calculate average score for a student from all exams."""

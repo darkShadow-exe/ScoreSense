@@ -6,9 +6,9 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from models.student_model import (
-    add_student, get_all_students, get_student_by_id, 
+    add_student, get_all_students, get_student_by_id,
     get_student_by_name, update_student, delete_student, get_all_subjects,
-    get_all_exams_for_student, add_exam_score, delete_exam
+    get_all_exams_for_student, add_exam_score, delete_exam, add_complete_exam
 )
 from core.nlu import parse_command
 from core.stats import (
