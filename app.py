@@ -322,6 +322,12 @@ def execute_command(parsed):
 @app.route('/graph/<graph_type>')
 def graph(graph_type):
     """Generate and return graph as base64 image."""
+    from core.graphs import (
+        generate_student_bar, generate_subject_average_bar,
+        generate_distribution_histogram, generate_comparison_chart,
+        generate_student_comparison, generate_student_pie,
+        generate_student_line, generate_student_radar
+    )
     
     student_name = request.args.get('student')
     subject = request.args.get('subject')
