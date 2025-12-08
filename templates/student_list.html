@@ -16,10 +16,8 @@
             <ul class="nav-menu">
                 <li><a href="/">Dashboard</a></li>
                 <li><a href="/students" class="active">Students</a></li>
-                <li><a href="/add">Add Student</a></li>
                 <li><a href="/stats">Statistics</a></li>
                 <li><a href="/command">Commands</a></li>
-                <li><a href="/import">Import Excel</a></li>
                 <li>
                     <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
                         <span class="material-symbols-outlined">dark_mode</span>
@@ -35,10 +33,16 @@
                 <span class="material-symbols-outlined">groups</span>
                 All Students
             </h2>
-            <a href="/add" class="btn btn-primary">
-                <span class="material-symbols-outlined">person_add</span>
-                Add Student
-            </a>
+            <div style="display: flex; gap: 10px;">
+                <a href="/add" class="btn btn-primary">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Add Student
+                </a>
+                <a href="/import" class="btn btn-secondary">
+                    <span class="material-symbols-outlined">upload_file</span>
+                    Import Excel
+                </a>
+            </div>
         </div>
 
         {% if students %}
@@ -99,26 +103,6 @@
                 </table>
             </div>
         </div>
-
-        <div class="visualization-section">
-            <h3>Visualization</h3>
-            <div class="graph-buttons">
-                <button onclick="loadGraph('student_comparison')" class="btn btn-secondary">
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    Compare All Students
-                </button>
-                <button onclick="loadGraph('subject_average')" class="btn btn-secondary">
-                    <span class="material-symbols-outlined">trending_up</span>
-                    Subject Averages
-                </button>
-                <button onclick="loadGraph('distribution')" class="btn btn-secondary">
-                    <span class="material-symbols-outlined">show_chart</span>
-                    Score Distribution
-                </button>
-            </div>
-            <div id="graph-container" class="graph-container"></div>
-        </div>
-
         {% else %}
         <div class="empty-state">
             <span class="material-symbols-outlined">school</span>

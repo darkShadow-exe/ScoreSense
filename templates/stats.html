@@ -16,10 +16,8 @@
             <ul class="nav-menu">
                 <li><a href="/">Dashboard</a></li>
                 <li><a href="/students">Students</a></li>
-                <li><a href="/add">Add Student</a></li>
                 <li><a href="/stats" class="active">Statistics</a></li>
                 <li><a href="/command">Commands</a></li>
-                <li><a href="/import">Import Excel</a></li>
                 <li>
                     <button id="theme-toggle" class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
                         <span class="material-symbols-outlined">dark_mode</span>
@@ -30,27 +28,31 @@
     </nav>
 
     <div class="container">
-        <h2>Class Statistics & Analytics</h2>
+        <div class="page-header">
+            <h2>
+                <span class="material-symbols-outlined">bar_chart</span>
+                Advanced Analytics
+            </h2>
+        </div>
 
+        <!-- Overview Cards -->
         <div class="stats-grid">
-            <div class="stat-card highlight">
-                <div class="stat-icon">👥</div>
+            <div class="stat-card">
+                <span class="material-symbols-outlined stat-icon">groups</span>
                 <div class="stat-content">
                     <h3>{{ stats.total_students }}</h3>
                     <p>Total Students</p>
                 </div>
             </div>
-
-            <div class="stat-card highlight">
-                <div class="stat-icon">📈</div>
+            <div class="stat-card">
+                <span class="material-symbols-outlined stat-icon">trending_up</span>
                 <div class="stat-content">
                     <h3>{{ stats.class_average }}</h3>
                     <p>Class Average</p>
                 </div>
             </div>
-
-            <div class="stat-card highlight">
-                <div class="stat-icon">🏆</div>
+            <div class="stat-card">
+                <span class="material-symbols-outlined stat-icon">emoji_events</span>
                 <div class="stat-content">
                     {% if stats.topper %}
                     <h3>{{ stats.topper.name }}</h3>
@@ -61,13 +63,12 @@
                     {% endif %}
                 </div>
             </div>
-
-            <div class="stat-card highlight">
-                <div class="stat-icon">📉</div>
+            <div class="stat-card">
+                <span class="material-symbols-outlined stat-icon">school</span>
                 <div class="stat-content">
                     {% if stats.lowest %}
                     <h3>{{ stats.lowest.name }}</h3>
-                    <p>Needs Help ({{ stats.lowest.average }})</p>
+                    <p>Needs Support ({{ stats.lowest.average }})</p>
                     {% else %}
                     <h3>-</h3>
                     <p>No Data</p>
@@ -76,87 +77,216 @@
             </div>
         </div>
 
-        {% if stats.subject_averages %}
+        <!-- Interactive Visualizations -->
         <div class="card">
-            <h3>📚 Subject Performance</h3>
-            <div class="subject-stats">
-                {% for subject, average in stats.subject_averages.items() %}
-                <div class="subject-stat-item">
-                    <div class="subject-header">
-                        <span class="subject-title">{{ subject|capitalize }}</span>
-                        <span class="subject-avg">{{ average }}</span>
-                    </div>
-                    <div class="progress-bar-full">
-                        <div class="progress-fill-stat" data-width="{{ average }}"></div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        {% if stats.difficulty_ranking %}
-        <div class="card">
-            <h3>🎯 Subject Difficulty Ranking</h3>
-            <p class="subtitle">Lower average = More difficult</p>
-            <div class="ranking-list">
-                {% for subject, avg in stats.difficulty_ranking %}
-                <div class="ranking-item">
-                    <span class="rank-number">{{ loop.index }}</span>
-                    <span class="rank-subject">{{ subject|capitalize }}</span>
-                    <span class="rank-score">Average: {{ avg }}</span>
-                    <span class="rank-difficulty">
-                        {% if avg < 60 %}
-                        <span class="badge badge-hard">Hard</span>
-                        {% elif avg < 75 %}
-                        <span class="badge badge-medium">Medium</span>
-                        {% else %}
-                        <span class="badge badge-easy">Easy</span>
-                        {% endif %}
-                    </span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        {% if stats.score_distribution %}
-        <div class="card">
-            <h3>📊 Score Distribution</h3>
-            <div class="distribution-grid">
-                {% for range, count in stats.score_distribution.items() %}
-                <div class="distribution-item">
-                    <div class="dist-label">{{ range }}</div>
-                    <div class="dist-bar">
-                        <div class="dist-fill" data-count="{{ count }}"></div>
-                    </div>
-                    <div class="dist-count">{{ count }}</div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="card">
-            <h3>📈 Visualizations</h3>
-            <div class="graph-buttons">
-                <button onclick="loadGraph('subject_average')" class="btn btn-primary">
-                    Subject Averages
+            <h3>
+                <span class="material-symbols-outlined">insert_chart</span>
+                Interactive Charts
+            </h3>
+            <div class="graph-tabs">
+                <button class="graph-tab active" onclick="switchGraph('subject_average')">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Subject Performance
                 </button>
-                <button onclick="loadGraph('distribution')" class="btn btn-primary">
+                <button class="graph-tab" onclick="switchGraph('distribution')">
+                    <span class="material-symbols-outlined">pie_chart</span>
                     Score Distribution
                 </button>
-                <button onclick="loadGraph('student_comparison')" class="btn btn-primary">
+                <button class="graph-tab" onclick="switchGraph('student_comparison')">
+                    <span class="material-symbols-outlined">equalizer</span>
                     Student Comparison
                 </button>
             </div>
-            <div id="graph-container" class="graph-container"></div>
+            <div id="graph-container" class="graph-container">
+                <p style="text-align: center; color: #666; padding: 40px;">Click a tab above to view charts</p>
+            </div>
         </div>
+
+        <!-- Subject Performance Table -->
+        {% if stats.subject_averages %}
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">subject</span>
+                Subject Performance Analysis
+            </h3>
+            <div class="table-responsive">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Subject</th>
+                            <th>Average Score</th>
+                            <th>Performance</th>
+                            <th>Difficulty</th>
+                            <th>Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject, avg in stats.difficulty_ranking %}
+                        <tr>
+                            <td><strong>{{ loop.index }}</strong></td>
+                            <td>{{ subject|capitalize }}</td>
+                            <td><span class="score-badge">{{ avg }}</span></td>
+                            <td>
+                                <div class="progress-bar-full" style="max-width: 200px;">
+                                    <div class="progress-fill-stat" data-width="{{ avg }}" style="width: 0;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if avg >= 80 %}
+                                <span class="badge badge-easy">Excellent</span>
+                                {% elif avg >= 70 %}
+                                <span class="badge badge-medium">Good</span>
+                                {% elif avg >= 60 %}
+                                <span class="badge badge-medium">Average</span>
+                                {% else %}
+                                <span class="badge badge-hard">Needs Focus</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span style="font-size: 24px;">
+                                    {% if avg >= 80 %}🟢
+                                    {% elif avg >= 70 %}🟡
+                                    {% elif avg >= 60 %}🟠
+                                    {% else %}🔴
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Score Distribution Analysis -->
+        {% if stats.score_distribution %}
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">analytics</span>
+                Score Distribution Breakdown
+            </h3>
+            <div class="table-responsive">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Score Range</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                            <th>Distribution</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_scores = stats.score_distribution.values()|sum %}
+                        {% for range, count in stats.score_distribution.items() %}
+                        <tr>
+                            <td><strong>{{ range }}</strong></td>
+                            <td>{{ count }}</td>
+                            <td>
+                                {% set percentage = (count / total_scores * 100) if total_scores > 0 else 0 %}
+                                {{ "%.1f"|format(percentage) }}%
+                            </td>
+                            <td>
+                                <div class="progress-bar-full" style="max-width: 300px;">
+                                    {% set percentage = (count / total_scores * 100) if total_scores > 0 else 0 %}
+                                    <div class="progress-fill-stat" data-width="{{ percentage }}" style="width: 0;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if range == '81-100' %}
+                                <span class="badge badge-easy">Excellent</span>
+                                {% elif range == '61-80' %}
+                                <span class="badge badge-medium">Good</span>
+                                {% elif range == '41-60' %}
+                                <span class="badge badge-medium">Average</span>
+                                {% else %}
+                                <span class="badge badge-hard">At Risk</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Top Performers -->
+        {% if students %}
+        <div class="card">
+            <h3>
+                <span class="material-symbols-outlined">emoji_events</span>
+                Top 10 Performers
+            </h3>
+            <div class="table-responsive">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student Name</th>
+                            <th>Average Score</th>
+                            <th>Performance Level</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students[:10] %}
+                        <tr>
+                            <td>
+                                {% if loop.index == 1 %}🥇
+                                {% elif loop.index == 2 %}🥈
+                                {% elif loop.index == 3 %}🥉
+                                {% else %}{{ loop.index }}
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ student.name }}</strong></td>
+                            <td><span class="score-badge">{{ student.average }}</span></td>
+                            <td>
+                                {% if student.average >= 90 %}
+                                <span class="badge badge-easy">Outstanding</span>
+                                {% elif student.average >= 80 %}
+                                <span class="badge badge-easy">Excellent</span>
+                                {% elif student.average >= 70 %}
+                                <span class="badge badge-medium">Very Good</span>
+                                {% else %}
+                                <span class="badge badge-medium">Good</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/student/{{ student.id }}/stats" class="btn-small btn-primary">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
-        // Animate progress bars
+        let currentGraph = null;
+
+        // Switch between graph tabs
+        function switchGraph(graphType) {
+            // Update active tab
+            document.querySelectorAll('.graph-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.graph-tab').classList.add('active');
+            
+            // Load graph
+            currentGraph = graphType;
+            loadGraph(graphType);
+        }
+
+        // Animate progress bars on page load
         document.addEventListener('DOMContentLoaded', function() {
             const fills = document.querySelectorAll('.progress-fill-stat');
             fills.forEach(fill => {
@@ -166,23 +296,15 @@
                 }, 100);
             });
 
-            const distFills = document.querySelectorAll('.dist-fill');
-            const maxCount = Math.max(...Array.from(distFills).map(f => 
-                parseInt(f.getAttribute('data-count'))));
-            
-            distFills.forEach(fill => {
-                const count = parseInt(fill.getAttribute('data-count'));
-                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                setTimeout(() => {
-                    fill.style.width = percentage + '%';
-                }, 100);
-            });
+            // Auto-load first graph
+            setTimeout(() => {
+                loadGraph('subject_average');
+            }, 500);
         });
     </script>
 
     <footer>
         <p>Score Analyser © 2025</p>
     </footer>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -1,36 +1,43 @@
 from models.student_model import get_all_students, get_all_subjects
 import statistics
+import sqlite3
+import os
+
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'db', 'students.db')
+
+def get_connection():
+    """Get a database connection."""
+    return sqlite3.connect(DB_PATH)
 
 def get_class_average():
-    """Calculate overall class average across all subjects."""
-    students = get_all_students()
+    """Calculate overall class average across all subjects from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
     
-    if not students:
-        return 0
+    cursor.execute('SELECT AVG(score) FROM exams')
+    result = cursor.fetchone()[0]
+    conn.close()
     
-    total_scores = []
-    for student in students:
-        scores = list(student['marks'].values())
-        total_scores.extend(scores)
-    
-    return round(statistics.mean(total_scores), 2) if total_scores else 0
+    return round(result, 2) if result else 0
 
 def get_subject_averages():
-    """Calculate average score for each subject."""
-    students = get_all_students()
-    subjects = get_all_subjects()
+    """Calculate average score for each subject from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
     
-    subject_scores = {subject: [] for subject in subjects}
+    cursor.execute('''
+        SELECT subject, AVG(score) as avg_score
+        FROM exams
+        GROUP BY subject
+        ORDER BY subject
+    ''')
     
-    for student in students:
-        for subject, score in student['marks'].items():
-            if subject in subject_scores:
-                subject_scores[subject].append(score)
+    rows = cursor.fetchall()
+    conn.close()
     
     averages = {}
-    for subject, scores in subject_scores.items():
-        if scores:
-            averages[subject] = round(statistics.mean(scores), 2)
+    for row in rows:
+        averages[row[0]] = round(row[1], 2)
     
     return averages
 
@@ -40,89 +47,97 @@ def get_class_topper(subject=None):
     If subject is specified, get topper for that subject.
     Otherwise, get overall topper based on average.
     """
-    students = get_all_students()
-    
-    if not students:
-        return None
+    conn = get_connection()
+    cursor = conn.cursor()
     
     if subject:
-        # Subject-specific topper
-        best_student = None
-        best_score = -1
+        # Subject-specific topper from exams table
+        cursor.execute('''
+            SELECT s.name, e.score
+            FROM students s
+            JOIN exams e ON s.id = e.student_id
+            WHERE e.subject = ?
+            ORDER BY e.score DESC
+            LIMIT 1
+        ''', (subject,))
         
-        for student in students:
-            if subject in student['marks']:
-                score = student['marks'][subject]
-                if score > best_score:
-                    best_score = score
-                    best_student = {
-                        'name': student['name'],
-                        'score': score,
-                        'subject': subject
-                    }
+        row = cursor.fetchone()
+        conn.close()
         
-        return best_student
+        if row:
+            return {
+                'name': row[0],
+                'score': round(row[1], 2),
+                'subject': subject
+            }
+        return None
     else:
-        # Overall topper based on average
-        best_student = None
-        best_avg = -1
+        # Overall topper based on average from exams table
+        cursor.execute('''
+            SELECT s.name, AVG(e.score) as avg_score
+            FROM students s
+            JOIN exams e ON s.id = e.student_id
+            GROUP BY s.id, s.name
+            ORDER BY avg_score DESC
+            LIMIT 1
+        ''')
         
-        for student in students:
-            scores = list(student['marks'].values())
-            avg = statistics.mean(scores) if scores else 0
-            
-            if avg > best_avg:
-                best_avg = avg
-                best_student = {
-                    'name': student['name'],
-                    'average': round(avg, 2),
-                    'marks': student['marks']
-                }
+        row = cursor.fetchone()
+        conn.close()
         
-        return best_student
+        if row:
+            return {
+                'name': row[0],
+                'average': round(row[1], 2)
+            }
+        return None
 
 def get_lowest_scorer(subject=None):
-    """Get the student with lowest score."""
-    students = get_all_students()
-    
-    if not students:
-        return None
+    """Get the student with lowest score from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
     
     if subject:
-        # Subject-specific lowest
-        worst_student = None
-        worst_score = float('inf')
+        # Subject-specific lowest from exams table
+        cursor.execute('''
+            SELECT s.name, e.score
+            FROM students s
+            JOIN exams e ON s.id = e.student_id
+            WHERE e.subject = ?
+            ORDER BY e.score ASC
+            LIMIT 1
+        ''', (subject,))
         
-        for student in students:
-            if subject in student['marks']:
-                score = student['marks'][subject]
-                if score < worst_score:
-                    worst_score = score
-                    worst_student = {
-                        'name': student['name'],
-                        'score': score,
-                        'subject': subject
-                    }
+        row = cursor.fetchone()
+        conn.close()
         
-        return worst_student
+        if row:
+            return {
+                'name': row[0],
+                'score': round(row[1], 2),
+                'subject': subject
+            }
+        return None
     else:
-        # Overall lowest based on average
-        worst_student = None
-        worst_avg = float('inf')
+        # Overall lowest based on average from exams table
+        cursor.execute('''
+            SELECT s.name, AVG(e.score) as avg_score
+            FROM students s
+            JOIN exams e ON s.id = e.student_id
+            GROUP BY s.id, s.name
+            ORDER BY avg_score ASC
+            LIMIT 1
+        ''')
         
-        for student in students:
-            scores = list(student['marks'].values())
-            avg = statistics.mean(scores) if scores else 0
-            
-            if avg < worst_avg:
-                worst_avg = avg
-                worst_student = {
-                    'name': student['name'],
-                    'average': round(avg, 2),
-                    'marks': student['marks']
-                }
+        row = cursor.fetchone()
+        conn.close()
         
-        return worst_student
+        if row:
+            return {
+                'name': row[0],
+                'average': round(row[1], 2)
+            }
+        return None
 
 def get_subject_difficulty():
     """
@@ -137,25 +152,35 @@ def get_subject_difficulty():
     return difficulty_ranking
 
 def get_student_rank(student_name):
-    """Get rank of a student based on overall average."""
-    students = get_all_students()
+    """Get rank of a student based on overall average from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
     
-    if not students:
+    # Get all students with their averages from exams table
+    cursor.execute('''
+        SELECT s.name, AVG(e.score) as avg_score
+        FROM students s
+        LEFT JOIN exams e ON s.id = e.student_id
+        GROUP BY s.id, s.name
+        ORDER BY avg_score DESC
+    ''')
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
         return None
     
-    # Calculate averages for all students
+    # Build list of students with averages
     student_averages = []
-    for student in students:
-        scores = list(student['marks'].values())
-        avg = statistics.mean(scores) if scores else 0
+    for row in rows:
+        avg = row[1] if row[1] else 0
         student_averages.append({
-            'name': student['name'],
+            'name': row[0],
             'average': avg
         })
     
-    # Sort by average descending
-    student_averages.sort(key=lambda x: x['average'], reverse=True)
-    
+    # Already sorted by average DESC
     # Find rank
     for rank, student in enumerate(student_averages, 1):
         if student['name'].lower() == student_name.lower():
@@ -168,8 +193,13 @@ def get_student_rank(student_name):
     return None
 
 def get_score_distribution():
-    """Get distribution of scores in ranges."""
-    students = get_all_students()
+    """Get distribution of scores in ranges from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT score FROM exams')
+    rows = cursor.fetchall()
+    conn.close()
     
     ranges = {
         '0-40': 0,
@@ -178,16 +208,16 @@ def get_score_distribution():
         '81-100': 0
     }
     
-    for student in students:
-        for score in student['marks'].values():
-            if score <= 40:
-                ranges['0-40'] += 1
-            elif score <= 60:
-                ranges['41-60'] += 1
-            elif score <= 80:
-                ranges['61-80'] += 1
-            else:
-                ranges['81-100'] += 1
+    for row in rows:
+        score = row[0]
+        if score <= 40:
+            ranges['0-40'] += 1
+        elif score <= 60:
+            ranges['41-60'] += 1
+        elif score <= 80:
+            ranges['61-80'] += 1
+        else:
+            ranges['81-100'] += 1
     
     return ranges
 
@@ -216,18 +246,27 @@ def get_all_stats():
     }
 
 def compare_subject_scores(subject):
-    """Get all students' scores in a specific subject for comparison."""
-    students = get_all_students()
+    """Get all students' scores in a specific subject for comparison from exams table."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT s.name, AVG(e.score) as avg_score
+        FROM students s
+        JOIN exams e ON s.id = e.student_id
+        WHERE e.subject = ?
+        GROUP BY s.id, s.name
+        ORDER BY avg_score DESC
+    ''', (subject,))
+    
+    rows = cursor.fetchall()
+    conn.close()
     
     comparisons = []
-    for student in students:
-        if subject in student['marks']:
-            comparisons.append({
-                'name': student['name'],
-                'score': student['marks'][subject]
-            })
-    
-    # Sort by score descending
-    comparisons.sort(key=lambda x: x['score'], reverse=True)
+    for row in rows:
+        comparisons.append({
+            'name': row[0],
+            'score': round(row[1], 2)
+        })
     
     return comparisons

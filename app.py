@@ -121,7 +121,11 @@ def delete(student_id):
 def stats():
     """Show comprehensive statistics."""
     all_stats = get_all_stats()
-    return render_template('stats.html', stats=all_stats)
+    # Get all students sorted by average for top performers
+    all_students = get_all_students()
+    # Sort by average descending
+    all_students.sort(key=lambda x: x.get('average', 0), reverse=True)
+    return render_template('stats.html', stats=all_stats, students=all_students)
 
 @app.route('/command', methods=['GET', 'POST'])
 def command():
