@@ -15,13 +15,10 @@ from core.stats import (
     get_all_stats, get_class_topper, get_subject_averages,
     compare_subject_scores, get_student_rank
 )
+from core.graphs import generate_class_bar, generate_student_bar, generate_subject_comparison
+from core.predict import predict_score
 
 app = Flask(__name__)
-
-# Feature flags for optional heavy dependencies
-GRAPHS_ENABLED = False
-PREDICT_ENABLED = False
-EXCEL_ENABLED = False
 
 @app.route('/')
 def index():
@@ -326,13 +323,6 @@ def execute_command(parsed):
 @app.route('/graph/<graph_type>')
 def graph(graph_type):
     """Generate and return graph as base64 image."""
-    if not GRAPHS_ENABLED:
-        return jsonify({'error': 'Graph generation is disabled in this deployment'}), 503
-    
-    from core.graphs import (generate_student_bar, generate_subject_average_bar, 
-                            generate_distribution_histogram, generate_comparison_chart,
-                            generate_student_comparison, generate_student_pie,
-                            generate_student_line, generate_student_radar)
     
     student_name = request.args.get('student')
     subject = request.args.get('subject')
@@ -364,9 +354,6 @@ def graph(graph_type):
 @app.route('/predict/<student_name>/<subject>')
 def predict_endpoint(student_name, subject):
     """API endpoint for prediction."""
-    if not PREDICT_ENABLED:
-        return jsonify({'error': 'Prediction is disabled in this deployment'}), 503
-    
     from core.predict import predict_score
     result = predict_score(student_name, subject)
     return jsonify(result)
@@ -447,9 +434,6 @@ def delete_exam_route(exam_id):
 @app.route('/import', methods=['GET', 'POST'])
 def import_excel():
     """Import data from Excel file."""
-    if not EXCEL_ENABLED:
-        return render_template('import_excel.html', error='Excel import is disabled in this deployment')
-    
     if request.method == 'POST':
         if 'file' not in request.files:
             return render_template('import_excel.html', error='No file uploaded')

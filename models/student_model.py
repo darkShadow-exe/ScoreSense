@@ -107,10 +107,25 @@ def get_all_students():
     students = []
     for row in rows:
         student_id = row[0]
+        
+        # Get subject averages from exams table
+        cursor.execute('''
+            SELECT subject, AVG(score) as avg_score
+            FROM exams
+            WHERE student_id = ?
+            GROUP BY subject
+        ''', (student_id,))
+        subject_results = cursor.fetchall()
+        
+        subject_averages = {}
+        for subj_row in subject_results:
+            subject_averages[subj_row[0]] = round(subj_row[1], 1)
+        
         students.append({
             'id': student_id,
             'name': row[1],
             'marks': json.loads(row[2]),
+            'subject_averages': subject_averages,
             'grade': row[3],
             'section': row[4],
             'age': row[5],
@@ -336,7 +351,18 @@ def add_complete_exam(student_id, exam_name, marks_dict):
 
 def get_student_detailed_stats(student_id):
     """Get comprehensive statistics for a specific student."""
-    from utils.stats import calculate_stats, get_trend
+    def get_trend(scores):
+        """Calculate simple trend from scores."""
+        if len(scores) < 2:
+            return 'stable'
+        recent = sum(scores[:len(scores)//2]) / (len(scores)//2) if len(scores) >= 2 else scores[0]
+        older = sum(scores[len(scores)//2:]) / (len(scores) - len(scores)//2)
+        diff = recent - older
+        if diff > 5:
+            return 'improving'
+        elif diff < -5:
+            return 'declining'
+        return 'stable'
     
     student = get_student_by_id(student_id)
     if not student:

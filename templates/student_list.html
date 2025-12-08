@@ -65,8 +65,8 @@
                             <td class="student-name">{{ student.name }}</td>
                             {% for subject in subjects %}
                             <td>
-                                {% if subject in student.marks %}
-                                <span class="score-badge">{{ student.marks[subject] }}</span>
+                                {% if subject in student.subject_averages %}
+                                <span class="score-badge">{{ student.subject_averages[subject] }}</span>
                                 {% else %}
                                 <span class="score-na">-</span>
                                 {% endif %}
