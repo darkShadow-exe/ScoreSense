@@ -54,18 +54,26 @@ def parse_command(text):
 
 def extract_name(text):
     """Extract student name from text."""
-    # Pattern: "add NAME with" or "NAME with" or after "student NAME"
+    # Pattern priority: more specific patterns first
     patterns = [
-        r'(?:add|create|new student)\s+([A-Za-z]+)',
-        r'([A-Za-z]+)\s+with',
-        r'(?:student|for)\s+([A-Za-z]+)',
-        r'(?:predict|show|delete|remove|update)\s+([A-Za-z]+)(?:\'s)?',
+        # "add student NAME" or "create student NAME" or "new student NAME"
+        r'(?:add|create|new)\s+student\s+([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|age|gender|email|phone|to)|$)',
+        # "add NAME" or "create NAME" (only if not followed by "student")
+        r'(?:add|create)\s+(?!student)([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|age|gender|email|phone|to)|$)',
+        # "NAME with" (for exam commands)
+        r'^([A-Za-z\s]+?)\s+with',
+        # "for NAME" or "student NAME"
+        r'(?:student|for)\s+([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|:|exam)|$)',
+        # "predict/show/delete/remove/update NAME" or "NAME's"
+        r'(?:predict|show|delete|remove|update)\s+([A-Za-z\s]+?)(?:\'s|\s+(?:in|for|score|average|rank)|$)',
     ]
     
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
-            return match.group(1).capitalize()
+            name = match.group(1).strip()
+            # Capitalize each word (handles "john doe" -> "John Doe")
+            return ' '.join(word.capitalize() for word in name.split())
     
     return None
 
