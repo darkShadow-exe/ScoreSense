@@ -242,16 +242,24 @@
                                 {% endif %}
                             </td>
                             <td><strong>{{ student.name }}</strong></td>
-                            <td><span class="score-badge">{{ student.average }}</span></td>
                             <td>
-                                {% if student.average >= 90 %}
-                                <span class="badge badge-easy">Outstanding</span>
-                                {% elif student.average >= 80 %}
-                                <span class="badge badge-easy">Excellent</span>
-                                {% elif student.average >= 70 %}
-                                <span class="badge badge-medium">Very Good</span>
+                                {% if student.average %}
+                                <span class="score-badge">{{ student.average }}</span>
                                 {% else %}
+                                <span class="score-na">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if student.average and student.average >= 90 %}
+                                <span class="badge badge-easy">Outstanding</span>
+                                {% elif student.average and student.average >= 80 %}
+                                <span class="badge badge-easy">Excellent</span>
+                                {% elif student.average and student.average >= 70 %}
+                                <span class="badge badge-medium">Very Good</span>
+                                {% elif student.average %}
                                 <span class="badge badge-medium">Good</span>
+                                {% else %}
+                                <span class="badge badge-hard">No Data</span>
                                 {% endif %}
                             </td>
                             <td>

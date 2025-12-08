@@ -123,8 +123,8 @@ def stats():
     all_stats = get_all_stats()
     # Get all students sorted by average for top performers
     all_students = get_all_students()
-    # Sort by average descending
-    all_students.sort(key=lambda x: x.get('average', 0), reverse=True)
+    # Sort by average descending, handle None values
+    all_students.sort(key=lambda x: x.get('average') or 0, reverse=True)
     return render_template('stats.html', stats=all_stats, students=all_students)
 
 @app.route('/command', methods=['GET', 'POST'])
