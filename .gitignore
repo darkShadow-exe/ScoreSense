@@ -31,6 +31,7 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
+db/
 
 # IDEs
 .vscode/
@@ -48,28 +49,7 @@ Thumbs.db
 
 # Environment
 .env
-
-# Development and migration scripts
-create_mock_data.py
-create_sample_excel.py
-load_demo_data.py
-migrate_*.py
-verify_installation.py
-run.bat
-
-# Sample files
-sample_imports/
-
-# Redundant documentation (keep only README.md)
-BEGINNER_GUIDE.md
-PROJECT_SUMMARY.md
-QUICKSTART.md
-START_HERE.md
-TESTING.md
-
-# Database folder (recreated on deployment)
-db/
-
-# Utils (duplicate functionality)
-utils/
 .env.local
+
+# Vercel
+.vercel

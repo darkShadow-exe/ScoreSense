@@ -464,6 +464,10 @@ def import_excel():
     
     return render_template('import_excel.html')
 
+# Initialize database on startup
+from models.student_model import init_db
+init_db()
+
 if __name__ == '__main__':
     print("Starting Score Analyser Application...")
     print("Access the application at: http://127.0.0.1:5000")
