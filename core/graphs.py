@@ -64,7 +64,7 @@ def generate_student_bar(student_name):
     
     plt.xlabel('Subjects', fontsize=12)
     plt.ylabel('Scores', fontsize=12)
-    plt.title(f"{student['name']}'s Scores by Subject", fontsize=14, fontweight='bold')
+    plt.title(f"{student_name}'s Latest Scores by Subject", fontsize=14, fontweight='bold')
     plt.ylim(0, 105)
     plt.grid(axis='y', alpha=0.3)
     plt.tight_layout()
