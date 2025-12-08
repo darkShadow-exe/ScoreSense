@@ -15,7 +15,6 @@ from core.stats import (
     get_all_stats, get_class_topper, get_subject_averages,
     compare_subject_scores, get_student_rank
 )
-from core.graphs import generate_class_bar, generate_student_bar, generate_subject_comparison
 from core.predict import predict_score
 
 app = Flask(__name__)
