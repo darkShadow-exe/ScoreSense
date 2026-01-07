@@ -2722,28 +2722,6 @@ Press F12 in browser to see JavaScript errors
 
 ---
 
-## Next Steps for Learning
-
-### Beginner Level:
-1. Change colors in CSS
-2. Add a new field (like "age")
-3. Create a new simple route
-4. Modify button text
-
-### Intermediate Level:
-1. Add a new command type
-2. Create a new graph type
-3. Add data validation
-4. Implement search feature
-
-### Advanced Level:
-1. Add user authentication
-2. Switch to PostgreSQL
-3. Deploy to cloud (Heroku)
-4. Add real-time updates (WebSockets)
-
----
-
 ## Glossary
 
 - **Route**: URL path that triggers a function

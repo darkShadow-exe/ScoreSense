@@ -11,39 +11,57 @@ def parse_command(text):
     text = text.strip().lower()
     
     # Intent: ADD_EXAM (must check before ADD_STUDENT)
-    if any(phrase in text for phrase in ['add exam', 'add complete exam', 'add test', 'new exam']):
+    if any(phrase in text for phrase in ['add exam', 'add complete exam', 'add test', 'new exam', 
+                                           'record exam', 'enter exam', 'submit exam', 'input exam',
+                                           'add marks', 'enter marks', 'record marks', 'submit marks',
+                                           'give exam', 'enter test', 'record test results']):
         return parse_add_exam(text)
     
     # Intent: ADD_STUDENT (profile only)
-    elif any(word in text for word in ['add student', 'create student', 'new student', 'register student']):
+    elif any(word in text for word in ['add student', 'create student', 'new student', 'register student',
+                                        'enroll student', 'admit student', 'enrol', 'register new',
+                                        'i want to add', 'i want to register', 'i want to enroll',
+                                        'can you add', 'please add', 'create new student']):
         return parse_add_student_profile(text)
     
     # Intent: UPDATE_STUDENT
-    elif any(word in text for word in ['update', 'edit', 'modify', 'change']):
+    elif any(word in text for word in ['update', 'edit', 'modify', 'change', 'correct', 'fix',
+                                        'adjust', 'revise', 'set', 'alter']):
         return parse_update_student(text)
     
     # Intent: DELETE_STUDENT
-    elif any(word in text for word in ['delete', 'remove']):
+    elif any(word in text for word in ['delete', 'remove', 'drop', 'eliminate', 'erase',
+                                        'take out', 'get rid of']):
         return parse_delete_student(text)
     
     # Intent: SHOW_TOPPER
-    elif any(word in text for word in ['topper', 'best student', 'highest', 'top student']):
+    elif any(word in text for word in ['topper', 'best student', 'highest', 'top student',
+                                        'first rank', 'rank 1', 'who scored highest', 'who is first',
+                                        'who got the best', 'best performer', 'top scorer',
+                                        'highest scorer', 'who came first', 'number one']):
         return parse_show_topper(text)
     
     # Intent: SHOW_STATS
-    elif any(word in text for word in ['average', 'stats', 'statistics', 'class average']):
+    elif any(word in text for word in ['average', 'stats', 'statistics', 'class average',
+                                        'mean score', 'class performance', 'overall performance',
+                                        'class data', 'analytics', 'summary', 'report']):
         return parse_show_stats(text)
     
     # Intent: PREDICT
-    elif any(word in text for word in ['predict', 'forecast', 'next score']):
+    elif any(word in text for word in ['predict', 'forecast', 'next score', 'future score',
+                                        'expected score', 'what will', 'estimate', 'projection',
+                                        'anticipate', 'likely score', 'probable score']):
         return parse_predict(text)
     
     # Intent: COMPARE
-    elif any(word in text for word in ['compare', 'comparison']):
+    elif any(word in text for word in ['compare', 'comparison', 'rank', 'ranking', 'leaderboard',
+                                        'versus', 'vs', 'contrast', 'who is better', 'standings']):
         return parse_compare(text)
     
     # Intent: SHOW_STUDENT
-    elif any(word in text for word in ['show', 'display', 'get', 'find']):
+    elif any(word in text for word in ['show', 'display', 'get', 'find', 'search', 'lookup',
+                                        'view', 'see', 'info', 'information', 'details', 'tell me about',
+                                        'who is', 'what about']):
         return parse_show_student(text)
     
     else:
@@ -56,24 +74,63 @@ def extract_name(text):
     """Extract student name from text."""
     # Pattern priority: more specific patterns first
     patterns = [
-        # "add student NAME" or "create student NAME" or "new student NAME"
-        r'(?:add|create|new)\s+student\s+([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|age|gender|email|phone|to)|$)',
-        # "add NAME" or "create NAME" (only if not followed by "student")
-        r'(?:add|create)\s+(?!student)([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|age|gender|email|phone|to)|$)',
-        # "NAME with" (for exam commands)
-        r'^([A-Za-z\s]+?)\s+with',
-        # "for NAME" or "student NAME"
-        r'(?:student|for)\s+([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|:|exam)|$)',
-        # "predict/show/delete/remove/update NAME" or "NAME's"
-        r'(?:predict|show|delete|remove|update)\s+([A-Za-z\s]+?)(?:\'s|\s+(?:in|for|score|average|rank)|$)',
+        # "record test results for NAME:" or "record marks for NAME"
+        r'(?:record|enter|submit)\s+(?:test results|marks|exam)\s+(?:for|of)\s+([A-Za-z\s]+?)(?::|\s+with|\s+in)',
+        # "add/new exam for NAME:" or "add test for NAME:"
+        r'(?:add|new|give)\s+(?:exam|test|complete exam|marks)\s+(?:for|of)\s+([A-Za-z\s]+?)(?::|\s+with|\s+in)',
+        # "add student NAME" with optional "can you", "please", "i want to"
+        r'(?:add|create|new|register|enroll|enrol|admit)\s+(?:student|new)?\s*([A-Za-z\s]+?)(?:\s+(?:please|in|with|to|grade|section|age|gender|email|phone)|\?|$)',
+        # "can you add student NAME" or "i want to register NAME"
+        r'(?:can you|please|i want to)\s+(?:add|create|register|enroll)\s+(?:student)?\s*([A-Za-z\s]+?)(?:\s+(?:in|with|to|grade|section|please)|\?|$)',
+        # "update/fix/correct NAME's subject to score" or "fix NAME's subject score to score"
+        r'(?:update|edit|modify|change|correct|fix|adjust)\s+([A-Za-z]+)\'s\s+[a-z]+\s+(?:score)?\s*(?:to)?\s*\d+',
+        # "update/edit/modify/change NAME with"
+        r'(?:update|edit|modify|change|correct|fix|adjust|revise|set)\s+([A-Za-z]+)(?:\s+with)',
+        # "update/edit/modify/change NAME subject"
+        r'(?:update|edit|modify|change|correct|fix|adjust)\s+([A-Za-z]+)\s+[a-z]+\s+\d+',
+        # "who is NAME?" or "what about NAME?"
+        r'(?:who is|what about|tell me about|info about|information about)\s+([A-Za-z\s]+?)(?:\'s|\?|$)',
+        # "expected score for NAME" (avoid capturing 'score')
+        r'(?:expected|likely|probable)\s+score\s+for\s+([A-Za-z]+)',
+        # "predict/forecast NAME's" - exact possessive match (no spaces before 's)
+        r'(?:predict|forecast|estimate|what will)\s+([A-Za-z]+)\'s',
+        # "predict/forecast NAME subject"
+        r'(?:predict|forecast|estimate)\s+([A-Za-z]+)\s+[a-z]+',
+        # "show/display/get/find NAME" (but not "show topper" or "show stats")
+        r'(?:show|display|get|find|search|view|see|lookup)\s+(?:me)?\s*(?:info|information|details)?\s*(?:about)?\s*(?!topper|stats|statistics|average|class|me|the|rank|overall|summary|performance|rid)([A-Za-z\s]+?)(?:\s|\?|$)',
+        # "get rid of NAME" - specific pattern to avoid capturing 'rid'
+        r'get\s+rid\s+of\s+(?:student)?\s*([A-Za-z\s]+?)(?:\s|$)',
+        # "delete/remove NAME" or "delete student NAME"
+        r'(?:delete|remove|drop|eliminate|erase)(?:\s+student)?\s+([A-Za-z\s]+?)(?:\s|$)',
+        # "for NAME" (general case)
+        r'(?:for|of|about)\s+([A-Za-z\s]+?)(?:\s+(?:in|with|grade|section|:|exam|\?)|$)',
+        # "NAME with" (for commands like "alice with math 90")
+        r'^([A-Za-z\s]+?)\s+(?:with|got|scored)',
+        # "NAME's" possessive form (fallback, lower priority)
+        r'\b([A-Za-z]+)\'s',
     ]
     
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             name = match.group(1).strip()
-            # Capitalize each word (handles "john doe" -> "John Doe")
-            return ' '.join(word.capitalize() for word in name.split())
+            # Filter out action words and common words that might be captured
+            stop_words = ['update', 'edit', 'modify', 'change', 'add', 'new', 'exam', 'test', 
+                         'for', 'student', 'what', 'will', 'be', 'the', 'is', 'are', 'predict', 'forecast',
+                         'create', 'register', 'enroll', 'enrol', 'admit', 'record', 'enter', 'submit',
+                         'delete', 'remove', 'drop', 'show', 'display', 'get', 'find', 'search', 'view',
+                         'correct', 'fix', 'adjust', 'revise', 'set', 'me', 'you', 'can', 'please',
+                         'want', 'to', 'about', 'of', 'tell', 'who', 'see', 'lookup', 'info', 'information',
+                         'details', 'give', 'estimate', 'expected', 'marks', 'complete', 'rid', 'score',
+                         'performance', 'results', 'overall', 'summary']
+            
+            # Split name into words and filter out stop words
+            words = name.split()
+            filtered_words = [w for w in words if w.lower() not in stop_words]
+            
+            if filtered_words:
+                # Capitalize each word (handles "john doe" -> "John Doe")
+                return ' '.join(word.capitalize() for word in filtered_words)
     
     return None
 
@@ -81,19 +138,21 @@ def extract_marks(text):
     """Extract subject-marks pairs from text."""
     marks = {}
     
-    # Pattern: "85 in math", "math 85", "physics: 90"
+    # Pattern: "subject to score", "subject score", "score in subject", "subject: score"
     patterns = [
-        r'(\d+)\s+(?:in|for)\s+([a-z]+)',
-        r'([a-z]+)\s*[:=]\s*(\d+)',
-        r'([a-z]+)\s+(\d+)',
+        r'([a-z]+)\s+(?:score)?\s*to\s+(\d+)',  # "math to 95" or "math score to 95"
+        r'(\d+)\s+(?:in|for)\s+([a-z]+)',  # "85 in math"
+        r'([a-z]+)\s*[:=]\s*(\d+)',  # "math: 85" or "math=85"
+        r'([a-z]+)\s+(\d+)',  # "math 85"
     ]
     
     for pattern in patterns:
         matches = re.findall(pattern, text, re.IGNORECASE)
         for match in matches:
-            if pattern == patterns[0]:  # score comes first
+            # Determine if score is first or second based on pattern
+            if pattern == patterns[1]:  # "score in subject" - score comes first
                 score, subject = match
-            else:  # subject comes first
+            else:  # "subject to/: score" - subject comes first
                 subject, score = match
             
             # Validate subject name

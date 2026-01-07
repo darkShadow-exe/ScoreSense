@@ -176,78 +176,142 @@
 
         <div class="card">
             <h3>💡 Example Commands</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Click any command to try it out! Our AI understands natural language.</p>
             <div class="examples-grid">
+                <!-- Adding Students -->
                 <div class="example-item" onclick="fillCommand(this.textContent)">
                     <code>Add student John in grade 10 section A</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Register new student Emma age 15</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Enroll student Michael in grade 12 section B</code>
+                </div>
+                
+                <!-- Adding Exams -->
+                <div class="example-item" onclick="fillCommand(this.textContent)">
                     <code>Add exam for John: Midterm with math 90, physics 85, chemistry 88</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Add student Sarah in grade 11 section B age 16</code>
+                    <code>Record test results for Emma: Finals with english 95, biology 92</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Add exam for Sarah: Finals with math 95, physics 92</code>
+                    <code>Enter marks for Alice in science 88 and math 94</code>
+                </div>
+                
+                <!-- Viewing Information -->
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show me details about Sarah</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Show class topper</code>
+                    <code>Tell me about John's performance</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Show topper in math</code>
+                    <code>Find information about Mike</code>
                 </div>
+                
+                <!-- Toppers & Rankings -->
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Who is the class topper?</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Who scored highest in math?</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show me the best student in physics</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Who is number one in chemistry?</code>
+                </div>
+                
+                <!-- Predictions -->
                 <div class="example-item" onclick="fillCommand(this.textContent)">
                     <code>Predict Alice's math score</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Predict Grace's physics score</code>
+                    <code>What will be John's next physics score?</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Compare scores in biology</code>
+                    <code>Forecast Emma's chemistry performance</code>
+                </div>
+                
+                <!-- Comparisons & Stats -->
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Compare students in biology</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Show class average</code>
+                    <code>Show rankings for math</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Delete Tom</code>
+                    <code>What's the class average?</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Show me class performance</code>
+                </div>
+                
+                <!-- Updates & Deletions -->
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Update John's math score to 95</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Edit Sarah's chemistry marks to 88</code>
+                </div>
+                <div class="example-item" onclick="fillCommand(this.textContent)">
+                    <code>Remove student Tom</code>
                 </div>
             </div>
         </div>
 
         <div class="card">
             <h3>📖 Command Guide</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Our AI understands natural language! Use any variation that feels natural to you.</p>
             <div class="guide-list">
                 <div class="guide-item">
-                    <strong>Add Student Profile:</strong>
-                    <span>"Add student [Name] in grade [Grade] section [Section]"</span>
+                    <strong>➕ Add Student Profile:</strong>
+                    <span>"Add student [Name] in grade [Grade] section [Section]" | "Register [Name]" | "Enroll new student [Name]"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Add Exam:</strong>
-                    <span>"Add exam for [Name]: [Exam Name] with [Subject] [Score], [Subject] [Score]"</span>
+                    <strong>📝 Add Exam Results:</strong>
+                    <span>"Add exam for [Name]: [Exam] with [Subject] [Score]" | "Record marks for [Name]" | "Enter test results for [Name]"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Update Profile:</strong>
-                    <span>"Update [Name] with email [Email]" or "Update [Name] with grade [Grade]"</span>
+                    <strong>👁️ View Student:</strong>
+                    <span>"Show [Name]" | "Tell me about [Name]" | "Find [Name]" | "Display [Name]'s details"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Delete Student:</strong>
-                    <span>"Delete [Name]"</span>
+                    <strong>✏️ Update Marks:</strong>
+                    <span>"Update [Name] [Subject] [Score]" | "Edit [Name]'s marks" | "Change [Name] math to 95"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Show Topper:</strong>
-                    <span>"Show class topper" or "Show topper in [Subject]"</span>
+                    <strong>🗑️ Delete Student:</strong>
+                    <span>"Delete [Name]" | "Remove [Name]" | "Drop student [Name]"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Predict Score:</strong>
-                    <span>"Predict [Name]'s [Subject] score"</span>
+                    <strong>🏆 Show Topper:</strong>
+                    <span>"Who is the class topper?" | "Best student in [Subject]" | "Who scored highest?" | "Show top student"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Compare Scores:</strong>
-                    <span>"Compare scores in [Subject]"</span>
+                    <strong>🔮 Predict Score:</strong>
+                    <span>"Predict [Name]'s [Subject] score" | "What will be [Name]'s next score?" | "Forecast [Name]'s performance"</span>
                 </div>
                 <div class="guide-item">
-                    <strong>Show Statistics:</strong>
-                    <span>"Show class average" or "Show stats"</span>
+                    <strong>📊 Compare & Rankings:</strong>
+                    <span>"Compare students in [Subject]" | "Show rankings" | "Leaderboard for [Subject]"</span>
                 </div>
+                <div class="guide-item">
+                    <strong>📈 Statistics:</strong>
+                    <span>"Show class average" | "What's the class performance?" | "Display statistics" | "Class summary"</span>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--primary);">
+                <strong>💬 Natural Language Tips:</strong>
+                <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
+                    <li>Use conversational phrases like "Can you...", "Please...", "I want to..."</li>
+                    <li>Synonyms work too: Register/Enroll, Remove/Delete, Show/Display, Edit/Update</li>
+                    <li>Ask questions: "Who is...?", "What's the...?", "How did...?"</li>
+                    <li>Be casual: "Tell me about John" works just as well as "Show John"</li>
+                </ul>
             </div>
         </div>
     </div>

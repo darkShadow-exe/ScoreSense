@@ -1,4 +1,4 @@
-# Score Analyser - AI-Powered Student Management System
+# ScoreSense - AI-Powered Student Management System
 
 A comprehensive Flask web application for managing student scores with natural language processing, statistics, visualizations, and AI-powered predictions.
 

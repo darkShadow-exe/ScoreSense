@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import sys
 import os
 
@@ -15,9 +15,10 @@ from core.stats import (
     get_all_stats, get_class_topper, get_subject_averages,
     compare_subject_scores, get_student_rank
 )
-from core.predict import predict_score
+# Removed heavy import: from core.predict import predict_score
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'  # Change this in production!
 
 @app.route('/')
 def index():
@@ -125,19 +126,27 @@ def stats():
 @app.route('/command', methods=['GET', 'POST'])
 def command():
     """Natural language command interface."""
-    result = None
-    error = None
-    
     if request.method == 'POST':
         text = request.form.get('command', '').strip()
         
         if text:
             parsed = parse_command(text)
             result = execute_command(parsed)
+            # Store result in session and redirect (Post-Redirect-Get pattern)
+            session['command_result'] = result
+            session['command_text'] = text
+            return redirect(url_for('command'))
         else:
-            error = 'Please enter a command'
+            session['command_result'] = None
+            session['command_error'] = 'Please enter a command'
+            return redirect(url_for('command'))
     
-    return render_template('command.html', result=result, error=error)
+    # GET request - retrieve result from session (only shown once)
+    result = session.pop('command_result', None)
+    error = session.pop('command_error', None)
+    command_text = session.pop('command_text', '')
+    
+    return render_template('command.html', result=result, error=error, command_text=command_text)
 
 def execute_command(parsed):
     """Execute parsed NLU command and return result."""
@@ -288,6 +297,8 @@ def execute_command(parsed):
         name = parsed['name']
         subject = parsed['subject']
         
+        # Lazy import to avoid slow startup
+        from core.predict import predict_score
         prediction = predict_score(name, subject)
         
         if 'error' not in prediction:
@@ -359,6 +370,7 @@ def graph(graph_type):
 @app.route('/predict/<student_name>/<subject>')
 def predict_endpoint(student_name, subject):
     """API endpoint for prediction."""
+    # Lazy import to avoid slow startup
     from core.predict import predict_score
     result = predict_score(student_name, subject)
     return jsonify(result)

@@ -1,4 +1,4 @@
-from sklearn.linear_model import LinearRegression
+# Removed heavy startup import: from sklearn.linear_model import LinearRegression
 import numpy as np
 from models.student_model import get_student_by_name, get_student_history
 
@@ -13,6 +13,9 @@ def predict_score(student_name, subject):
     Returns:
         dict with 'predicted_score', 'confidence', 'history' or 'error'
     """
+    # Lazy import heavy library only when needed
+    from sklearn.linear_model import LinearRegression
+    
     student = get_student_by_name(student_name)
     
     if not student:
