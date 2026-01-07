@@ -125,17 +125,30 @@ def stats():
 
 @app.route('/command', methods=['GET', 'POST'])
 def command():
-    """Natural language command interface."""
+    """Natural language command interface with LLM processing."""
     if request.method == 'POST':
         text = request.form.get('command', '').strip()
         
         if text:
-            parsed = parse_command(text)
-            result = execute_command(parsed)
-            # Store result in session and redirect (Post-Redirect-Get pattern)
-            session['command_result'] = result
-            session['command_text'] = text
-            return redirect(url_for('command'))
+            try:
+                parsed = parse_command(text)
+                
+                # Check for parsing errors
+                if parsed.get('intent') == 'error':
+                    session['command_error'] = parsed.get('error', 'Unknown error occurred')
+                    session['command_result'] = None
+                else:
+                    result = execute_command(parsed)
+                    session['command_result'] = result
+                    session['command_error'] = None
+                
+                session['command_text'] = text
+                return redirect(url_for('command'))
+                
+            except Exception as e:
+                session['command_result'] = None
+                session['command_error'] = f'Error processing command: {str(e)}'
+                return redirect(url_for('command'))
         else:
             session['command_result'] = None
             session['command_error'] = 'Please enter a command'
@@ -481,4 +494,4 @@ init_db()
 if __name__ == '__main__':
     print("Starting Score Analyser Application...")
     print("Access the application at: http://127.0.0.1:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)

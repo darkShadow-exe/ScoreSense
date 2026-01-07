@@ -2,6 +2,52 @@
 import numpy as np
 from models.student_model import get_student_by_name, get_student_history
 
+def normalize_subject_name(subject, available_subjects):
+    """
+    Normalize subject name to match available subjects in the database.
+    
+    Args:
+        subject: Subject name from user input
+        available_subjects: List of available subjects in database
+        
+    Returns:
+        Normalized subject name or original if no match found
+    """
+    subject_lower = subject.lower()
+    
+    # Create mapping of common variations
+    subject_mappings = {
+        'math': 'mathematics',
+        'maths': 'mathematics', 
+        'phy': 'physics',
+        'chem': 'chemistry',
+        'bio': 'biology',
+        'eng': 'english',
+        'comp': 'computer science',
+        'cs': 'computer science',
+        'geo': 'geography',
+        'hist': 'history',
+        'sci': 'science'
+    }
+    
+    # First try direct mapping
+    if subject_lower in subject_mappings:
+        mapped_subject = subject_mappings[subject_lower]
+        # Find exact match in available subjects (case insensitive)
+        for available in available_subjects:
+            if available.lower() == mapped_subject:
+                return available
+    
+    # Try partial match with available subjects
+    for available in available_subjects:
+        if (subject_lower in available.lower() or 
+            available.lower().startswith(subject_lower) or
+            any(word in available.lower() for word in subject_lower.split())):
+            return available
+    
+    # Return original if no match found
+    return subject
+
 def predict_score(student_name, subject):
     """
     Predict next score for a student in a subject using linear regression.
@@ -21,21 +67,26 @@ def predict_score(student_name, subject):
     if not student:
         return {'error': f'Student {student_name} not found'}
     
+    # Normalize subject name to match database
+    available_subjects = list(student['marks'].keys()) if student['marks'] else []
+    normalized_subject = normalize_subject_name(subject, available_subjects)
+    
     # Get historical scores
-    history = get_student_history(student['id'], subject)
+    history = get_student_history(student['id'], normalized_subject)
     
     if not history:
         # No history, use current score as baseline
-        if subject in student['marks']:
-            current_score = student['marks'][subject]
+        if normalized_subject in student['marks']:
+            current_score = student['marks'][normalized_subject]
             return {
                 'predicted_score': round(current_score, 2),
                 'confidence': 'low',
                 'method': 'baseline',
-                'message': 'No historical data. Using current score as prediction.'
+                'message': f'No historical data for {normalized_subject}. Using current score as prediction.',
+                'subject_used': normalized_subject
             }
         else:
-            return {'error': f'No data available for {subject}'}
+            return {'error': f'No data available for {subject}. Available subjects: {", ".join(available_subjects)}'}
     
     # If only one data point, use heuristic
     if len(history) == 1:

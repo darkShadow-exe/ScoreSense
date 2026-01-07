@@ -32,10 +32,10 @@
     <div class="container">
         <div class="page-header">
             <h2>
-                <span class="material-symbols-outlined">chat</span>
-                Natural Language Commands
+                <span class="material-symbols-outlined">psychology</span>
+                AI Natural Language Commands
             </h2>
-            <p>Interact with the system using plain English or voice</p>
+            <p>Powered by Hack Club AI - Just describe what you want to do in plain English!</p>
         </div>
 
         <div class="card">
@@ -44,7 +44,7 @@
                     <label for="command">Enter Your Command</label>
                     <div class="command-input-wrapper">
                         <textarea id="command" name="command" rows="3" 
-                                  placeholder="Type or speak a command like: 'Add student Sarah in grade 10 section A' or 'Add exam for Sarah: Midterm with math 92, physics 88'"
+                                  placeholder="Try saying: 'Add a student named Alex in grade 11' or 'Show me who's the top performer in mathematics' or 'Add test scores for Sarah: Chemistry 94, Biology 89'"
                                   required></textarea>
                         <button type="button" id="mic-btn" class="mic-button" title="Click to speak">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -177,26 +177,26 @@
         {% endif %}
 
         <div class="card">
-            <h3>💡 Example Commands</h3>
-            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Click any command to try it out! Our AI understands natural language.</p>
+            <h3>🤖 AI-Powered Commands</h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary);">Click any example to try it! Our AI understands natural conversation.</p>
             <div class="examples-grid">
                 <!-- Adding Students -->
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Add student John in grade 10 section A</code>
+                    <code>Add a new student named Emma who is 16 years old</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Register new student Emma age 15</code>
+                    <code>Register student Michael in 12th grade section B</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Enroll student Michael in grade 12 section B</code>
+                    <code>Create student profile for Sarah, age 15, grade 10</code>
                 </div>
                 
                 <!-- Adding Exams -->
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Add exam for John: Midterm with math 90, physics 85, chemistry 88</code>
+                    <code>Add test scores for John: Mathematics 95, Physics 87, Chemistry 91</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
-                    <code>Record test results for Emma: Finals with english 95, biology 92</code>
+                    <code>Record Emma's final exam results: English 94, Biology 89, History 92</code>
                 </div>
                 <div class="example-item" onclick="fillCommand(this.textContent)">
                     <code>Enter marks for Alice in science 88 and math 94</code>
