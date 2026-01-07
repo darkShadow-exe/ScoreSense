@@ -9,7 +9,8 @@ import random
 from datetime import datetime, timedelta
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 from models.student_model import add_student, add_complete_exam, get_all_students
 
