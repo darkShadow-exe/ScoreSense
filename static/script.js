@@ -102,6 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
         firstInput.focus();
     }
     
+    // Animate progress bars on stats page
+    animateProgressBars();
+    
     // Add smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -308,4 +311,25 @@ if (document.readyState === 'loading') {
     if (micBtn) {
         micBtn.addEventListener('click', startSpeechRecognition);
     }
+}
+
+// Animate progress bars with data-width attributes
+function animateProgressBars() {
+    const progressFills = document.querySelectorAll('.progress-fill-stat[data-width]');
+    
+    progressFills.forEach((fill, index) => {
+        const width = parseFloat(fill.getAttribute('data-width'));
+        
+        // For percentage values (0-100), use as-is
+        // For score values (0-100), use as percentage
+        let percentage = width;
+        if (width > 1) {
+            percentage = Math.min(width, 100); // Cap at 100%
+        }
+        
+        // Animate with delay for staggered effect
+        setTimeout(() => {
+            fill.style.width = percentage + '%';
+        }, index * 100);
+    });
 }

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students - ScoreSense</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles_m3.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
@@ -82,18 +84,15 @@
                             <td class="actions">
                                 <a href="/student/{{ student.id }}/stats" class="btn-small btn-primary" title="View detailed statistics">
                                     <span class="material-symbols-outlined">analytics</span>
-                                    Details
                                 </a>
                                 <a href="/edit/{{ student.id }}" class="btn-small btn-edit" title="Edit student">
                                     <span class="material-symbols-outlined">edit</span>
-                                    Edit
                                 </a>
                                 <form method="POST" action="/delete/{{ student.id }}" style="display: inline;">
                                     <button type="submit" class="btn-small btn-delete" 
                                             onclick="return confirm('Delete {{ student.name }}?')"
                                             title="Delete student">
                                         <span class="material-symbols-outlined">delete</span>
-                                        Delete
                                     </button>
                                 </form>
                             </td>
@@ -116,11 +115,10 @@
         {% endif %}
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-
     <footer>
-        <p>Score Analyser © 2025</p>
+        <p>&copy; 2025 ScoreSense. AI-powered student performance analytics.</p>
     </footer>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
